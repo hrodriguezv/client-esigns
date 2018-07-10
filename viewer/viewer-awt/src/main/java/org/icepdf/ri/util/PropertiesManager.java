@@ -28,6 +28,7 @@ import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 
 
+// TODO: Auto-generated Javadoc
 /**
  * <p>This class provides a wrapper for persisting the viewer ri's settings.  The class also provides mechanisms for
  * loading default properties.  The class is divided into two sub concepts; the first being local properties (not sticky)
@@ -55,239 +56,592 @@ import javax.swing.JOptionPane;
 // todo rename class to ViewerPropertiesManager
 public class PropertiesManager {
 
+    /** The Constant logger. */
     private static final Logger logger =
             Logger.getLogger(PropertiesManager.class.toString());
 
+    /** The Constant PROPERTY_TOKEN_SEPARATOR. */
     // use ascii '27' or ESC as the delimiting character when storing multiple values in one property name.
     public static final String PROPERTY_TOKEN_SEPARATOR = "|";
 
+    /** The default prop file. */
     //default file for all not specified properties
     public static String DEFAULT_PROP_FILE = "ICEpdfDefault.properties";
+    
+    /** The default prop file path. */
     public static String DEFAULT_PROP_FILE_PATH = "org/icepdf/ri/viewer/res/";
+    
+    /** The default message bundle. */
     public static String DEFAULT_MESSAGE_BUNDLE = "org.icepdf.ri.resources.MessageBundle";
 
+    /** The Constant PROPERTY_DEFAULT_FILE_PATH. */
     public static final String PROPERTY_DEFAULT_FILE_PATH = "application.default.filepath";
+    
+    /** The Constant PROPERTY_DEFAULT_URL. */
     public static final String PROPERTY_DEFAULT_URL = "application.default.url";
 
+    /** The Constant PROPERTY_RECENT_FILES_SIZE. */
     public static final String PROPERTY_RECENT_FILES_SIZE = "application.menu.recent.file.size";
 
+    /** The Constant PROPERTY_ICON_DEFAULT_SIZE. */
     public static final String PROPERTY_ICON_DEFAULT_SIZE = "application.icon.default.size";
 
+    /** The Constant PROPERTY_DIVIDER_LOCATION. */
     // window properties
     public static final String PROPERTY_DIVIDER_LOCATION = "application.divider.location";
+    
+    /** The Constant PROPERTY_DEFAULT_PAGEFIT. */
     // default page fit mode
     public static final String PROPERTY_DEFAULT_PAGEFIT = "document.pagefit.mode";
+    
+    /** The Constant PROPERTY_DEFAULT_ROTATION. */
     public static final String PROPERTY_DEFAULT_ROTATION = "document.rotation";
+    
+    /** The Constant PROPERTY_DEFAULT_VIEW_TYPE. */
     // page rotation
     public static final String PROPERTY_DEFAULT_VIEW_TYPE = "document.viewtype";
+    
+    /** The Constant PROPERTY_PRINT_MEDIA_SIZE_WIDTH. */
     // default print media size.
     public static final String PROPERTY_PRINT_MEDIA_SIZE_WIDTH = "document.print.mediasize.width";
+    
+    /** The Constant PROPERTY_PRINT_MEDIA_SIZE_HEIGHT. */
     public static final String PROPERTY_PRINT_MEDIA_SIZE_HEIGHT = "document.print.mediasize.height";
+    
+    /** The Constant PROPERTY_PRINT_MEDIA_SIZE_UNIT. */
     public static final String PROPERTY_PRINT_MEDIA_SIZE_UNIT = "document.print.mediasize.unit";
+    
+    /** The Constant PROPERTY_TEXT_SELECTION_COLOR. */
     // highlight and selection text colours.
     public static final String PROPERTY_TEXT_SELECTION_COLOR = "org.icepdf.core.views.page.text.selection.color";
+    
+    /** The Constant PROPERTY_TEXT_HIGHLIGHT_COLOR. */
     public static final String PROPERTY_TEXT_HIGHLIGHT_COLOR = "org.icepdf.core.views.page.text.highlight.color";
+    
+    /** The Constant PROPERTY_PAGE_VIEW_SHADOW_COLOR. */
     // page view colour settings.
     public static final String PROPERTY_PAGE_VIEW_SHADOW_COLOR = "org.icepdf.core.views.page.shadow.color";
+    
+    /** The Constant PROPERTY_PAGE_VIEW_PAPER_COLOR. */
     public static final String PROPERTY_PAGE_VIEW_PAPER_COLOR = "org.icepdf.core.views.page.paper.color";
+    
+    /** The Constant PROPERTY_PAGE_VIEW_BORDER_COLOR. */
     public static final String PROPERTY_PAGE_VIEW_BORDER_COLOR = "org.icepdf.core.views.page.border.color";
+    
+    /** The Constant PROPERTY_PAGE_VIEW_BACKGROUND_COLOR. */
     public static final String PROPERTY_PAGE_VIEW_BACKGROUND_COLOR = "org.icepdf.core.views.background.color";
+    
+    /** The Constant PROPERTY_IMAGING_REFERENCE_TYPE. */
     // image reference type.
     public static final String PROPERTY_IMAGING_REFERENCE_TYPE = "org.icepdf.core.imageReference";
+    
+    /** The Constant PROPERTY_IMAGE_PROXY_ENABLED. */
     // advanced threading properties
     public static final String PROPERTY_IMAGE_PROXY_ENABLED = "org.icepdf.core.imageProxy";
+    
+    /** The Constant PROPERTY_IMAGE_PROXY_THREAD_COUNT. */
     public static final String PROPERTY_IMAGE_PROXY_THREAD_COUNT = "org.icepdf.core.library.imageThreadPoolSize";
+    
+    /** The Constant PROPERTY_COMMON_THREAD_COUNT. */
     public static final String PROPERTY_COMMON_THREAD_COUNT = "org.icepdf.core.library.threadPoolSize";
+    
+    /** The Constant PROPERTY_SHOW_MENU_RECENT_FILES. */
     // properties used to hide/show toolbars
     public static final String PROPERTY_SHOW_MENU_RECENT_FILES = "application.toolbar.show.resentfiles";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_UTILITY. */
     public static final String PROPERTY_SHOW_TOOLBAR_UTILITY = "application.toolbar.show.utility";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_PAGENAV. */
     public static final String PROPERTY_SHOW_TOOLBAR_PAGENAV = "application.toolbar.show.pagenav";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ZOOM. */
     public static final String PROPERTY_SHOW_TOOLBAR_ZOOM = "application.toolbar.show.zoom";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_FIT. */
     public static final String PROPERTY_SHOW_TOOLBAR_FIT = "application.toolbar.show.fit";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_FULL_SCREEN. */
     public static final String PROPERTY_SHOW_TOOLBAR_FULL_SCREEN = "application.toolbar.show.fullscreen";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ROTATE. */
     public static final String PROPERTY_SHOW_TOOLBAR_ROTATE = "application.toolbar.show.rotate";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_TOOL. */
     public static final String PROPERTY_SHOW_TOOLBAR_TOOL = "application.toolbar.show.tool";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION = "application.toolbar.show.annotation";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_FORMS. */
     public static final String PROPERTY_SHOW_TOOLBAR_FORMS = "application.toolbar.show.forms";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_SEARCH. */
     public static final String PROPERTY_SHOW_TOOLBAR_SEARCH = "application.toolbar.show.search";
+    
+    /** The Constant PROPERTY_SHOW_STATUSBAR. */
     // properties used to hide/show status bar buttons
     public static final String PROPERTY_SHOW_STATUSBAR = "application.statusbar";
+    
+    /** The Constant PROPERTY_SHOW_STATUSBAR_STATUSLABEL. */
     // properties used to hide/show status bar status label
     public static final String PROPERTY_SHOW_STATUSBAR_STATUSLABEL = "application.statusbar.show.statuslabel";
+    
+    /** The Constant PROPERTY_SHOW_STATUSBAR_VIEWMODE. */
     // properties used to hide/show status bar buttons
     public static final String PROPERTY_SHOW_STATUSBAR_VIEWMODE = "application.statusbar.show.viewmode";
+    
+    /** The Constant PROPERTY_SHOW_STATUSBAR_VIEWMODE_SINGLE. */
     public static final String PROPERTY_SHOW_STATUSBAR_VIEWMODE_SINGLE = "application.statusbar.show.viewmode.singlepage";
+    
+    /** The Constant PROPERTY_SHOW_STATUSBAR_VIEWMODE_SINGLE_CONTINUOUS. */
     public static final String PROPERTY_SHOW_STATUSBAR_VIEWMODE_SINGLE_CONTINUOUS = "application.statusbar.show.viewmode.single.page.continuous";
+    
+    /** The Constant PROPERTY_SHOW_STATUSBAR_VIEWMODE_DOUBLE. */
     public static final String PROPERTY_SHOW_STATUSBAR_VIEWMODE_DOUBLE = "application.statusbar.show.viewmode.double.page";
+    
+    /** The Constant PROPERTY_SHOW_STATUSBAR_VIEWMODE_DOUBLE_CONTINUOUS. */
     public static final String PROPERTY_SHOW_STATUSBAR_VIEWMODE_DOUBLE_CONTINUOUS = "application.statusbar.show.viewmode.double.page.continuous";
+    
+    /** The Constant PROPERTY_SHOW_UTILITY_OPEN. */
     // properties used to hide/show the utility buttons (open, print, etc.)
     public static final String PROPERTY_SHOW_UTILITY_OPEN = "application.toolbar.show.utility.open";
+    
+    /** The Constant PROPERTY_SHOW_UTILITY_SAVE. */
     public static final String PROPERTY_SHOW_UTILITY_SAVE = "application.toolbar.show.utility.save";
+    
+    /** The Constant PROPERTY_SHOW_UTILITY_PRINT. */
     public static final String PROPERTY_SHOW_UTILITY_PRINT = "application.toolbar.show.utility.print";
+    
+    /** The Constant PROPERTY_SHOW_UTILITY_SEARCH. */
     public static final String PROPERTY_SHOW_UTILITY_SEARCH = "application.toolbar.show.utility.search";
+    
+    /** The Constant PROPERTY_SHOW_UTILITY_UPANE. */
     public static final String PROPERTY_SHOW_UTILITY_UPANE = "application.toolbar.show.utility.upane";
+    
+    /** The Constant PROPERTY_SHOW_UTILITY_SIGN. */
     public static final String PROPERTY_SHOW_UTILITY_SIGN = "application.toolbar.show.utility.sign";
+    
+    /** The Constant PROPERTY_SHOW_UTILITY_SWAP. */
     public static final String PROPERTY_SHOW_UTILITY_SWAP = "application.toolbar.show.utility.swap";
+    
+    /** The Constant PROPERTY_SHOW_UTILITY_OK. */
     public static final String PROPERTY_SHOW_UTILITY_OK = "application.toolbar.show.utility.ok";
+	
+	/** The Constant PROPERTY_SHOW_UTILITY_RESET. */
 	public static final String PROPERTY_SHOW_UTILITY_RESET = "application.toolbar.show.utility.reset";    
+    
+    /** The Constant PROPERTY_HIDE_UTILITYPANE. */
     // properties used to hide/show utility pane tabs
     public static final String PROPERTY_HIDE_UTILITYPANE = "application.utilitypane.hide";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_BOOKMARKS. */
     public static final String PROPERTY_SHOW_UTILITYPANE_BOOKMARKS = "application.utilitypane.show.bookmarks";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_ATTACHMENTS. */
     public static final String PROPERTY_SHOW_UTILITYPANE_ATTACHMENTS = "application.utilitypane.show.attachments";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_SEARCH. */
     public static final String PROPERTY_SHOW_UTILITYPANE_SEARCH = "application.utilitypane.show.search";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_THUMBNAILS. */
     public static final String PROPERTY_SHOW_UTILITYPANE_THUMBNAILS = "application.utilitypane.show.thumbs";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_LAYERS. */
     public static final String PROPERTY_SHOW_UTILITYPANE_LAYERS = "application.utilitypane.show.layers";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_ANNOTATION. */
     public static final String PROPERTY_SHOW_UTILITYPANE_ANNOTATION = "application.utilitypane.show.annotation";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_ANNOTATION_FLAGS. */
     public static final String PROPERTY_SHOW_UTILITYPANE_ANNOTATION_FLAGS = "application.utilitypane.show.annotation.flags";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_SIGNATURES. */
     public static final String PROPERTY_SHOW_UTILITYPANE_SIGNATURES = "application.utilitypane.show.signatures";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_ANNOTATION_MARKUP. */
     // sub control for annotation tabs
     public static final String PROPERTY_SHOW_UTILITYPANE_ANNOTATION_MARKUP = "application.utilitypane.show.annotation.markup";
+    
+    /** The Constant PROPERTY_SHOW_UTILITYPANE_ANNOTATION_DESTINATIONS. */
     public static final String PROPERTY_SHOW_UTILITYPANE_ANNOTATION_DESTINATIONS = "application.utilitypane.show.annotation.dests";
+    
+    /** The Constant PROPERTY_SHOW_PREFERENCES_GENERAL. */
     // properties use dot hide/show preferences pane tabs.
     public static final String PROPERTY_SHOW_PREFERENCES_GENERAL = "application.preferences.show.general";
+    
+    /** The Constant PROPERTY_SHOW_PREFERENCES_ANNOTATIONS. */
     public static final String PROPERTY_SHOW_PREFERENCES_ANNOTATIONS = "application.preferences.show.annotations";
+    
+    /** The Constant PROPERTY_SHOW_PREFERENCES_IMAGING. */
     public static final String PROPERTY_SHOW_PREFERENCES_IMAGING = "application.preferences.show.imaging";
+    
+    /** The Constant PROPERTY_SHOW_PREFERENCES_FONTS. */
     public static final String PROPERTY_SHOW_PREFERENCES_FONTS = "application.preferences.show.fonts";
+    
+    /** The Constant PROPERTY_SHOW_PREFERENCES_ADVANCED. */
     public static final String PROPERTY_SHOW_PREFERENCES_ADVANCED = "application.preferences.show.advanced";
+    
+    /** The Constant PROPERTY_UTILITYPANE_THUMBNAILS_ZOOM. */
     // default utility pane thumbnail zoom size for non-embedded files
     public static final String PROPERTY_UTILITYPANE_THUMBNAILS_ZOOM = "application.utilitypane.thumbnail.zoom";
+    
+    /** The Constant PROPERTY_DEFAULT_ZOOM_LEVEL. */
     // properties used for default zoom levels
     public static final String PROPERTY_DEFAULT_ZOOM_LEVEL = "application.zoom.factor.default";
+    
+    /** The Constant PROPERTY_ZOOM_RANGES. */
     public static final String PROPERTY_ZOOM_RANGES = "application.zoom.range.default";
+    
+    /** The Constant PROPERTY_SHOW_KEYBOARD_SHORTCUTS. */
     // property to hide/show menu keyboard accelerator shortcuts
     public static final String PROPERTY_SHOW_KEYBOARD_SHORTCUTS = "application.menuitem.show.keyboard.shortcuts";
+    
+    /** The Constant PROPERTY_VIEWPREF_HIDETOOLBAR. */
     // properties used for overriding ViewerPreferences pulled from the document
     public static final String PROPERTY_VIEWPREF_HIDETOOLBAR = "application.viewerpreferences.hidetoolbar";
+    
+    /** The Constant PROPERTY_VIEWPREF_HIDEMENUBAR. */
     public static final String PROPERTY_VIEWPREF_HIDEMENUBAR = "application.viewerpreferences.hidemenubar";
+    
+    /** The Constant PROPERTY_VIEWPREF_FITWINDOW. */
     public static final String PROPERTY_VIEWPREF_FITWINDOW = "application.viewerpreferences.fitwindow";
+    
+    /** The Constant PROPERTY_VIEWPREF_FORM_HIGHLIGHT. */
     public static final String PROPERTY_VIEWPREF_FORM_HIGHLIGHT = "application.viewerpreferences.form.highlight";
+    
+    /** The Constant PROPERTY_VIEWPREF_ANNOTATION_EDIT_MODE. */
     public static final String PROPERTY_VIEWPREF_ANNOTATION_EDIT_MODE = "application.viewerpreferences.annotation.editmode";
+    
+    /** The Constant PROPERTY_ANNOTATION_HIGHLIGHT_SELECTION_ENABLED. */
     // annotation handler default to selection tool after annotation is created.
     public static final String PROPERTY_ANNOTATION_HIGHLIGHT_SELECTION_ENABLED = "application.annotation.highlight.selection.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_LINE_SELECTION_ENABLED. */
     public static final String PROPERTY_ANNOTATION_LINE_SELECTION_ENABLED = "application.annotation.line.selection.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_LINK_SELECTION_ENABLED. */
     public static final String PROPERTY_ANNOTATION_LINK_SELECTION_ENABLED = "application.annotation.link.selection.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_SQUARE_SELECTION_ENABLED. */
     public static final String PROPERTY_ANNOTATION_SQUARE_SELECTION_ENABLED = "application.annotation.rectangle.selection.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_CIRCLE_SELECTION_ENABLED. */
     public static final String PROPERTY_ANNOTATION_CIRCLE_SELECTION_ENABLED = "application.annotation.circle.selection.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_INK_SELECTION_ENABLED. */
     public static final String PROPERTY_ANNOTATION_INK_SELECTION_ENABLED = "application.annotation.ink.selection.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_FREE_TEXT_SELECTION_ENABLED. */
     public static final String PROPERTY_ANNOTATION_FREE_TEXT_SELECTION_ENABLED = "application.annotation.freetext.selection.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_TEXT_SELECTION_ENABLED. */
     public static final String PROPERTY_ANNOTATION_TEXT_SELECTION_ENABLED = "application.annotation.text.selection.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_HIGHLIGHT_ENABLED. */
     // properties used to control visibility of annotation controls on main utility panel.
     public static final String PROPERTY_ANNOTATION_PROPERTIES_HIGHLIGHT_ENABLED = "application.annotation.properties.highlight.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_UNDERLINE_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_UNDERLINE_ENABLED = "application.annotation.properties.underline.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_STRIKE_OUT_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_STRIKE_OUT_ENABLED = "application.annotation.properties.strikeout.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_LINE_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_LINE_ENABLED = "application.annotation.properties.line.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_LINK_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_LINK_ENABLED = "application.annotation.properties.link.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_ARROW_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_ARROW_ENABLED = "application.annotation.properties.arrow.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_RECTANGLE_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_RECTANGLE_ENABLED = "application.annotation.properties.rectangle.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_CIRCLE_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_CIRCLE_ENABLED = "application.annotation.properties.circle.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_INK_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_INK_ENABLED = "application.annotation.properties.ink.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_FREE_TEXT_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_FREE_TEXT_ENABLED = "application.annotation.properties.freetext.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_PROPERTIES_TEXT_ENABLED. */
     public static final String PROPERTY_ANNOTATION_PROPERTIES_TEXT_ENABLED = "application.annotation.properties.text.enabled";
+    
+    /** The Constant PROPERTY_ANNOTATION_EDITING_MODE_ENABLED. */
     public static final String PROPERTY_ANNOTATION_EDITING_MODE_ENABLED = "application.annotation.editing.mode.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_SELECTION. */
     // Individual controls for the annotation toolbar button commands
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_SELECTION = "application.toolbar.annotation.selection.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_HIGHLIGHT. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_HIGHLIGHT = "application.toolbar.annotation.highlight.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_UNDERLINE. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_UNDERLINE = "application.toolbar.annotation.underline.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_STRIKE_OUT. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_STRIKE_OUT = "application.toolbar.annotation.strikeout.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_LINE. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_LINE = "application.toolbar.annotation.line.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_LINK. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_LINK = "application.toolbar.annotation.link.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_ARROW. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_ARROW = "application.toolbar.annotation.arrow.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_RECTANGLE. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_RECTANGLE = "application.toolbar.annotation.rectangle.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_CIRCLE. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_CIRCLE = "application.toolbar.annotation.circle.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_INK. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_INK = "application.toolbar.annotation.ink.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_FREE_TEXT. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_FREE_TEXT = "application.toolbar.annotation.freetext.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_TEXT. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_TEXT = "application.toolbar.annotation.text.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_PERMISSION. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_PERMISSION = "application.toolbar.annotation.permission.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_UTILITY. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_UTILITY = "application.toolbar.annotation.toolbar.enabled";
+    
+    /** The Constant PROPERTY_SHOW_TOOLBAR_ANNOTATION_PREVIEW. */
     public static final String PROPERTY_SHOW_TOOLBAR_ANNOTATION_PREVIEW = "application.toolbar.annotation.preview.enabled";
+    
+    /** The Constant PROPERTY_SHOW_ANNOTATION_MARKUP_REPLY_TO. */
     // Individual control of the markup annotation context menu
     public static final String PROPERTY_SHOW_ANNOTATION_MARKUP_REPLY_TO = "application.annotation.show.markup.replyTo";
+    
+    /** The Constant PROPERTY_SHOW_ANNOTATION_MARKUP_ADD_ANNOTATIONS. */
     public static final String PROPERTY_SHOW_ANNOTATION_MARKUP_ADD_ANNOTATIONS = "application.annotation.show.markup.addAnnotations";
+    
+    /** The Constant PROPERTY_SHOW_ANNOTATION_MARKUP_SET_STATUS. */
     public static final String PROPERTY_SHOW_ANNOTATION_MARKUP_SET_STATUS = "application.annotation.show.markup.setStatus";
 
+    /** The Constant PROPERTY_ANNOTATION_HIGHLIGHT_BUTTON_COLOR. */
     // highlight annotation default colour as defined by the last used colour for each type.
     public static final String PROPERTY_ANNOTATION_HIGHLIGHT_BUTTON_COLOR = "application.viewer.preference.annotation.highlight.button.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_HIGHLIGHT_COLOR. */
     public static final String PROPERTY_ANNOTATION_HIGHLIGHT_COLOR = "application.viewer.preference.annotation.highlight.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_HIGHLIGHT_OPACITY. */
     public static final String PROPERTY_ANNOTATION_HIGHLIGHT_OPACITY = "application.viewer.preference.annotation.highlight.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_STRIKE_OUT_COLOR. */
     public static final String PROPERTY_ANNOTATION_STRIKE_OUT_COLOR = "application.viewer.preference.annotation.strikeout.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_STRIKE_OUT_OPACITY. */
     public static final String PROPERTY_ANNOTATION_STRIKE_OUT_OPACITY = "application.viewer.preference.annotation.strikeout.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_UNDERLINE_COLOR. */
     public static final String PROPERTY_ANNOTATION_UNDERLINE_COLOR = "application.viewer.preference.annotation.underline.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_UNDERLINE_OPACITY. */
     public static final String PROPERTY_ANNOTATION_UNDERLINE_OPACITY = "application.viewer.preference.annotation.underline.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_SQUIGGLY_COLOR. */
     public static final String PROPERTY_ANNOTATION_SQUIGGLY_COLOR = "application.viewer.preference.annotation.squiggly.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_SQUIGGLY_OPACITY. */
     public static final String PROPERTY_ANNOTATION_SQUIGGLY_OPACITY = "application.viewer.preference.annotation.squiggly.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_TEXT_BUTTON_COLOR. */
     public static final String PROPERTY_ANNOTATION_TEXT_BUTTON_COLOR = "application.viewer.preference.annotation.text.button.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_TEXT_COLOR. */
     public static final String PROPERTY_ANNOTATION_TEXT_COLOR = "application.viewer.preference.annotation.text.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_TEXT_OPACITY. */
     public static final String PROPERTY_ANNOTATION_TEXT_OPACITY = "application.viewer.preference.annotation.text.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_TEXT_ICON. */
     public static final String PROPERTY_ANNOTATION_TEXT_ICON = "application.viewer.preference.annotation.text.icon";
+    
+    /** The Constant PROPERTY_ANNOTATION_INK_COLOR. */
     public static final String PROPERTY_ANNOTATION_INK_COLOR = "application.viewer.preference.annotation.ink.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_INK_OPACITY. */
     public static final String PROPERTY_ANNOTATION_INK_OPACITY = "application.viewer.preference.annotation.ink.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_SQUARE_COLOR. */
     // annotation types with stroke and fill colours
     public static final String PROPERTY_ANNOTATION_SQUARE_COLOR = "application.viewer.preference.annotation.square.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_SQUARE_FILL_COLOR. */
     public static final String PROPERTY_ANNOTATION_SQUARE_FILL_COLOR = "application.viewer.preference.annotation.square.fill.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_SQUARE_OPACITY. */
     public static final String PROPERTY_ANNOTATION_SQUARE_OPACITY = "application.viewer.preference.annotation.square.fill.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_CIRCLE_COLOR. */
     public static final String PROPERTY_ANNOTATION_CIRCLE_COLOR = "application.viewer.preference.annotation.circle.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_CIRCLE_FILL_COLOR. */
     public static final String PROPERTY_ANNOTATION_CIRCLE_FILL_COLOR = "application.viewer.preference.annotation.circle.fill.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_CIRCLE_OPACITY. */
     public static final String PROPERTY_ANNOTATION_CIRCLE_OPACITY = "application.viewer.preference.annotation.circle.fill.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_LINE_COLOR. */
     public static final String PROPERTY_ANNOTATION_LINE_COLOR = "application.viewer.preference.annotation.line.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_LINE_FILL_COLOR. */
     public static final String PROPERTY_ANNOTATION_LINE_FILL_COLOR = "application.viewer.preference.annotation.line.fill.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_LINE_OPACITY. */
     public static final String PROPERTY_ANNOTATION_LINE_OPACITY = "application.viewer.preference.annotation.line.fill.opcity";
+    
+    /** The Constant PROPERTY_ANNOTATION_LINE_ARROW_COLOR. */
     public static final String PROPERTY_ANNOTATION_LINE_ARROW_COLOR = "application.viewer.preference.annotation.arrow.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_LINE_ARROW_FILL_COLOR. */
     public static final String PROPERTY_ANNOTATION_LINE_ARROW_FILL_COLOR = "application.viewer.preference.annotation.arrow.fill.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_LINE_ARROW_OPACITY. */
     public static final String PROPERTY_ANNOTATION_LINE_ARROW_OPACITY = "application.viewer.preference.annotation.arrow.fill.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_FREE_TEXT_COLOR. */
     // free text, quite a lot of properties
     public static final String PROPERTY_ANNOTATION_FREE_TEXT_COLOR = "application.viewer.preference.annotation.freetext.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_FREE_TEXT_SIZE. */
     public static final String PROPERTY_ANNOTATION_FREE_TEXT_SIZE = "application.viewer.preference.annotation.freetext.size";
+    
+    /** The Constant PROPERTY_ANNOTATION_FREE_TEXT_FONT. */
     public static final String PROPERTY_ANNOTATION_FREE_TEXT_FONT = "application.viewer.preference.annotation.freetext.font";
+    
+    /** The Constant PROPERTY_ANNOTATION_FREE_TEXT_OPACITY. */
     public static final String PROPERTY_ANNOTATION_FREE_TEXT_OPACITY = "application.viewer.preference.annotation.freetext.opacity";
+    
+    /** The Constant PROPERTY_ANNOTATION_FREE_TEXT_FILL_COLOR. */
     public static final String PROPERTY_ANNOTATION_FREE_TEXT_FILL_COLOR = "application.viewer.preference.annotation.freetext.fill.color";
+    
+    /** The Constant PROPERTY_ANNOTATION_FREE_TEXT_BORDER_COLOR. */
     public static final String PROPERTY_ANNOTATION_FREE_TEXT_BORDER_COLOR = "application.viewer.preference.annotation.freetext.border.color";
 
+    /** The Constant PROPERTY_ANNOTATION_RECENT_COLORS. */
     // we use the same recent colour list for all annotation types
     public static final String PROPERTY_ANNOTATION_RECENT_COLORS = "application.viewer.preference.annotation.color.recent";
+    
+    /** The Constant PROPERTY_ANNOTATION_RECENT_COLOR_LABEL. */
     // resent colour and labels, enabled automatically if there is more then one.
     public static final String PROPERTY_ANNOTATION_RECENT_COLOR_LABEL = "application.viewer.preference.annotation.recent.color.labels";
 
+    /** The Constant PROPERTY_RECENTLY_OPENED_FILES. */
     // store for recently opened files.
     public static final String PROPERTY_RECENTLY_OPENED_FILES = "application.viewer.preference.recent.files";
 
+    /** The Constant PROPERTY_ANNOTATION_SORT_COLUMN. */
     // store of sort, filter and quick colour markup annotation utility pane persisted values.
     public static final String PROPERTY_ANNOTATION_SORT_COLUMN = "application.viewer.utility.annotation.sort.column";
+    
+    /** The Constant PROPERTY_ANNOTATION_FILTER_AUTHOR_COLUMN. */
     public static final String PROPERTY_ANNOTATION_FILTER_AUTHOR_COLUMN = "application.viewer.utility.annotation.filter.author.column";
+    
+    /** The Constant PROPERTY_ANNOTATION_FILTER_TYPE_COLUMN. */
     public static final String PROPERTY_ANNOTATION_FILTER_TYPE_COLUMN = "application.viewer.utility.annotation.filter.type.column";
+    
+    /** The Constant PROPERTY_ANNOTATION_FILTER_COLOR_COLUMN. */
     public static final String PROPERTY_ANNOTATION_FILTER_COLOR_COLUMN = "application.viewer.utility.annotation.filter.color.column";
+    
+    /** The Constant PROPERTY_ANNOTATION_QUICK_COLOR. */
     public static final String PROPERTY_ANNOTATION_QUICK_COLOR = "application.viewer.utility.annotation.filter.quick.color";
 
+    /** The Constant PROPERTY_SEARCH_PANEL_REGEX_ENABLED. */
     // text search panel settings
     public static final String PROPERTY_SEARCH_PANEL_REGEX_ENABLED = "application.viewer.utility.search.regex.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_PANEL_WHOLE_WORDS_ENABLED. */
     public static final String PROPERTY_SEARCH_PANEL_WHOLE_WORDS_ENABLED = "application.viewer.utility.search.whole.words.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_PANEL_CASE_SENSITIVE_ENABLED. */
     public static final String PROPERTY_SEARCH_PANEL_CASE_SENSITIVE_ENABLED = "application.viewer.utility.search.case.sensitive.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_PANEL_CUMULATIVE_ENABLED. */
     public static final String PROPERTY_SEARCH_PANEL_CUMULATIVE_ENABLED = "application.viewer.utility.search.case.cumulative.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_PANEL_SEARCH_COMMENTS_ENABLED. */
     public static final String PROPERTY_SEARCH_PANEL_SEARCH_COMMENTS_ENABLED = "application.viewer.utility.search.comments.cumulative.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_PANEL_SEARCH_DEST_ENABLED. */
     public static final String PROPERTY_SEARCH_PANEL_SEARCH_DEST_ENABLED = "application.viewer.utility.search.case.destinations.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_PANEL_SEARCH_TEXT_ENABLED. */
     public static final String PROPERTY_SEARCH_PANEL_SEARCH_TEXT_ENABLED = "application.viewer.utility.search.case.text.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_PANEL_SEARCH_OUTLINES_ENABLED. */
     public static final String PROPERTY_SEARCH_PANEL_SEARCH_OUTLINES_ENABLED = "application.viewer.utility.search.case.outlines.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_PANEL_SHOW_PAGES_ENABLED. */
     public static final String PROPERTY_SEARCH_PANEL_SHOW_PAGES_ENABLED = "application.viewer.utility.search.case.pages.enabled";
 
+    /** The Constant PROPERTY_SEARCH_MARKUP_PANEL_REGEX_ENABLED. */
     // markup search panel settings
     public static final String PROPERTY_SEARCH_MARKUP_PANEL_REGEX_ENABLED = "application.viewer.utility.search.markup.regex.enabled";
+    
+    /** The Constant PROPERTY_SEARCH_MARKUP_PANEL_CASE_SENSITIVE_ENABLED. */
     public static final String PROPERTY_SEARCH_MARKUP_PANEL_CASE_SENSITIVE_ENABLED = "application.viewer.utility.search.markup.case.sensitive.enabled";
 
+    /** The Constant PROPERTY_ANNOTATION_SUMMARY_FONT_NAME. */
     // annotation summary panel font size and name.
     public static final String PROPERTY_ANNOTATION_SUMMARY_FONT_NAME = "application.viewer.annotation.summary.font.name";
+    
+    /** The Constant PROPERTY_ANNOTATION_SUMMARY_FONT_SIZE. */
     public static final String PROPERTY_ANNOTATION_SUMMARY_FONT_SIZE = "application.viewer.annotation.summary.font.size";
 
+    /** The Constant PROPERTY_ANNOTATION_LAST_USED_PUBLIC_FLAG. */
     // stored state of last used public/private annotation flag.
     public static final String PROPERTY_ANNOTATION_LAST_USED_PUBLIC_FLAG = "application.viewer.annotation.public.flag";
 
+    //extended properties
+    /** The Constant PROPERTY_USER_STROKE_IMGNAME. */
+    public static final String PROPERTY_USER_STROKE_FILENAME = "user.default.strokefilebasename";
+    /** The Constant PROPERTY_USER_STROKE_IMGEXT. */
+    public static final String PROPERTY_USER_STROKE_IMGEXT = "user.default.strokeimgextension";
+    /** The Constant PROPERTY_USER_STROKE_TEXTEXT. */
+    public static final String PROPERTY_USER_STROKE_TEXTEXT = "user.default.stroketxtextension";
+    /** The Constant DEFAULT_FORMATTER_MASK. */
+    public static final String DEFAULT_FORMATTER_MASK = "stroke.dateformatter.timestamp";
+    /** The Constant QUEUE_SERVER_NAME. */
+    public static final String QUEUE_SERVER_NAME = "apache.activeq.servername";
+    /** The Constant QUEUE_SERVER_HOST. */
+    public static final String QUEUE_SERVER_HOST = "apache.activeq.host";
+    /** The Constant QUEUE_SERVER_PORT. */
+    public static final String QUEUE_SERVER_PORT = "apache.activeq.port";
+
+    
+    /** The properties manager. */
     private static PropertiesManager propertiesManager;
 
+    /** The preferences. */
     // static store of properties which are persisted to backing store.
     private static Preferences preferences = Preferences.userNodeForPackage(PropertiesManager.class);
+    
+    /** The local properties. */
     // local properties, that aren't persisted and can override properties in the store if root accessor are used.
     private static Properties localProperties;
+    
+    /** The default props. */
     // default properties file included int the viewer jar
     private static Properties defaultProps;
 
+    /**
+     * Instantiates a new properties manager.
+     */
     private PropertiesManager() {
     }
 
@@ -325,9 +679,9 @@ public class PropertiesManager {
     }
 
     /**
-     * Removes the
+     * Removes the.
      *
-     * @param propertyName
+     * @param propertyName the property name
      */
     public void remove(String propertyName) {
         localProperties.remove(propertyName);
@@ -391,7 +745,7 @@ public class PropertiesManager {
      * Method to check the value of a string property
      * This is meant to be used for configuration via the properties file
      * After the property has been checked, it will be stored back into the Properties
-     * object (using a default value if none was found)
+     * object (using a default value if none was found).
      *
      * @param propertyName to check for
      * @param defaultVal   to default to if no value is found on a property
@@ -406,6 +760,12 @@ public class PropertiesManager {
         return returnValue;
     }
 
+    /**
+     * Check and store boolean property.
+     *
+     * @param propertyName the property name
+     * @return true, if successful
+     */
     public boolean checkAndStoreBooleanProperty(String propertyName) {
         return checkAndStoreBooleanProperty(propertyName, true);
     }
@@ -414,7 +774,7 @@ public class PropertiesManager {
      * Method to check the value of a boolean property
      * This is meant to be used for configuration via the properties file
      * After the property has been checked, it will be stored back into the Properties
-     * object (using a default value if none was found)
+     * object (using a default value if none was found).
      *
      * @param propertyName to check for
      * @param defaultVal   to default to if no value is found on a property
@@ -430,6 +790,12 @@ public class PropertiesManager {
         return returnValue;
     }
 
+    /**
+     * Check and store double property.
+     *
+     * @param propertyName the property name
+     * @return the double
+     */
     public double checkAndStoreDoubleProperty(String propertyName) {
         return checkAndStoreDoubleProperty(propertyName, 1.0f);
     }
@@ -438,7 +804,7 @@ public class PropertiesManager {
      * Method to check the value of a double property
      * This is meant to be used for configuration via the properties file
      * After the property has been checked, it will be stored back into the Properties
-     * object (using a default value if none was found)
+     * object (using a default value if none was found).
      *
      * @param propertyName to check for
      * @param defaultVal   to default to if no value is found on a property
@@ -453,6 +819,12 @@ public class PropertiesManager {
         return returnValue;
     }
 
+    /**
+     * Check and store int property.
+     *
+     * @param propertyName the property name
+     * @return the int
+     */
     public int checkAndStoreIntProperty(String propertyName) {
         return checkAndStoreIntProperty(propertyName, 1);
     }
@@ -461,7 +833,7 @@ public class PropertiesManager {
      * Method to check the value of an int property
      * This is meant to be used for configuration via the properties file
      * After the property has been checked, it will be stored back into the Properties
-     * object (using a default value if none was found)
+     * object (using a default value if none was found).
      *
      * @param propertyName to check for
      * @param defaultVal   to default to if no value is found on a property
@@ -476,6 +848,12 @@ public class PropertiesManager {
         return returnValue;
     }
 
+    /**
+     * Check and store float property.
+     *
+     * @param propertyName the property name
+     * @return the float
+     */
     public float checkAndStoreFloatProperty(String propertyName) {
         return checkAndStoreFloatProperty(propertyName, 1);
     }
@@ -484,7 +862,7 @@ public class PropertiesManager {
      * Method to check the value of an int property
      * This is meant to be used for configuration via the properties file
      * After the property has been checked, it will be stored back into the Properties
-     * object (using a default value if none was found)
+     * object (using a default value if none was found).
      *
      * @param propertyName to check for
      * @param defaultVal   to default to if no value is found on a property
@@ -554,7 +932,7 @@ public class PropertiesManager {
     }
 
     /**
-     * Allows users to set the default look and feel of the
+     * Allows users to set the default look and feel of the.
      *
      * @param propertyName  look and feel class and package name.
      * @param defaultValue  default value
@@ -637,6 +1015,13 @@ public class PropertiesManager {
         localProperties = new Properties(defaultProps);
     }
 
+    /**
+     * Gets the resource as stream.
+     *
+     * @param prefix the prefix
+     * @param resourcePath the resource path
+     * @return the resource as stream
+     */
     private static InputStream getResourceAsStream(String prefix, String resourcePath) {
         int colon = resourcePath.indexOf(':');
         if (colon >= 0) {
@@ -660,6 +1045,13 @@ public class PropertiesManager {
         return ClassLoader.getSystemResourceAsStream(resourcePath);
     }
 
+    /**
+     * Make res path.
+     *
+     * @param prefix the prefix
+     * @param base_name the base name
+     * @return the string
+     */
     private static String makeResPath(String prefix, String base_name) {
         if (base_name.length() != 0 && base_name.charAt(0) == '/') {
             return base_name.substring(1, base_name.length());

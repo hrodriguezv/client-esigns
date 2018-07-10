@@ -2,6 +2,8 @@
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Socket;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -16,6 +18,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.consultec.esigns.core.security.SecurityProvider;
+import com.consultec.esigns.core.util.InetUtility;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -95,8 +98,18 @@ public class TestSign {
 			  .setLayer2Text("Approval test signature.")
 			  .setCertificate(provider.getCertificate());
 
-		ITSAClient tsaClient = new TSAClientBouncyCastle("http://time.certum.pl/");
-
+		
+		//http://213.37.154.21:12080/CryptosecOpenKey/tsa_service
+		//http://as-demo.bit4id.org/smartengine/tsa
+		//http://time.certum.pl/
+		
+		String serverUrl =  "http://time.certum.pl/";
+		ITSAClient tsaClient = null;
+		
+		if (InetUtility.isReachable(serverUrl)) {
+			tsaClient = new TSAClientBouncyCastle(serverUrl);
+		}
+		
 		if (sigPolicyInfo == null) {
 			signer.signDetached(new BouncyCastleDigest(), pks, signChain, null, null, tsaClient, 0,
 					PdfSigner.CryptoStandard.CADES);
@@ -106,6 +119,8 @@ public class TestSign {
 		}
 	}
 
+	
+	
 	static void basicCheckSignedDoc(String filePath, String signatureName)
 			throws GeneralSecurityException, IOException {
 		PdfDocument outDocument = new PdfDocument(new PdfReader(filePath));

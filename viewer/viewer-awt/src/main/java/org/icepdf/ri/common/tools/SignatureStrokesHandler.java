@@ -63,7 +63,9 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 	public SignatureStrokesHandler(DocumentViewController documentViewController,
 			AbstractPageViewComponent pageViewComponent) {
 		super(documentViewController, pageViewComponent);
-		this.signProvider = ((DocumentViewControllerExtendedImpl) documentViewController).getSignatureVendor();
+		if (documentViewController instanceof DocumentViewControllerExtendedImpl) {
+			this.signProvider = ((DocumentViewControllerExtendedImpl) documentViewController).getSignatureVendor();
+		}
 	}
 
 	/*
@@ -121,6 +123,9 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 	 */
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
+		
+		if (signProvider == null) return;
+		
 		File pdfDocument = FileSystemManager.getInstance().getPdfDocument();
 		File strokedDocument = FileSystemManager.getInstance().getPdfStrokedDoc();
 
@@ -148,24 +153,28 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 					STROKE_SRC_NAME + timeStamp + TEXT_SRC_EXT);
 			File finalImgName = new File(FileSystemManager.getInstance().getBaseHome().getAbsolutePath(),
 					STROKE_SRC_NAME + timeStamp + IMAGE_SRC_EXT);
-			signProvider.sign();
-			signProvider.writeImageFile(finalImgName.getAbsolutePath());
-			FileUtil.write(finalStrokeText.getAbsolutePath(), signProvider.getEncodedSign().getBytes());
 
-			FileSystemManager.getInstance().addImgStrokeFile(finalImgName);
-			FileSystemManager.getInstance().addTextStrokeFile(finalStrokeText);
+			int signal = signProvider.sign();
 
-			manipulatePdf(pathFile, pathOutputFile, finalImgName.getAbsolutePath(), tBbox);
+			if (signal == 0) {
+				signProvider.writeImageFile(finalImgName.getAbsolutePath());
+				FileUtil.write(finalStrokeText.getAbsolutePath(), signProvider.getEncodedSign().getBytes());
 
-			int currentPage = documentViewController.getCurrentPageDisplayValue();
-			controller.openDocument(pathOutputFile);
-			controller.showPage(currentPage);
-			// navigate to the location
-			Rectangle2D.Float bounds = new Rectangle2D.Float((float) tBbox.getX(), (float) tBbox.getY(),
-					(float) tBbox.getWidth(), (float) tBbox.getHeight()); // word.getBounds();
-			controller.getDocumentViewController()
-					.setDestinationTarget(new Destination(controller.getDocument().getPageTree().getPage(--currentPage),
-							(int) bounds.x, (int) (bounds.y + bounds.height + 100)));
+				FileSystemManager.getInstance().addImgStrokeFile(finalImgName);
+				FileSystemManager.getInstance().addTextStrokeFile(finalStrokeText);
+
+				manipulatePdf(pathFile, pathOutputFile, finalImgName.getAbsolutePath(), tBbox);
+
+				int currentPage = documentViewController.getCurrentPageDisplayValue();
+				controller.openDocument(pathOutputFile);
+				controller.showPage(currentPage);
+				// navigate to the location
+				Rectangle2D.Float bounds = new Rectangle2D.Float((float) tBbox.getX(), (float) tBbox.getY(),
+						(float) tBbox.getWidth(), (float) tBbox.getHeight()); // word.getBounds();
+				controller.getDocumentViewController().setDestinationTarget(
+						new Destination(controller.getDocument().getPageTree().getPage(--currentPage), (int) bounds.x,
+								(int) (bounds.y + bounds.height + 100)));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -220,11 +229,16 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 	/**
 	 * Manipulate pdf.
 	 *
-	 * @param src            the src
-	 * @param dest            the dest
-	 * @param imgSrc            the img src
-	 * @param r the r
-	 * @throws Exception             the exception
+	 * @param src
+	 *            the src
+	 * @param dest
+	 *            the dest
+	 * @param imgSrc
+	 *            the img src
+	 * @param r
+	 *            the r
+	 * @throws Exception
+	 *             the exception
 	 */
 	protected void manipulatePdf(String src, String dest, String imgSrc, Rectangle r) throws Exception {
 		PdfReader reader = new PdfReader(src);
@@ -234,10 +248,10 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 		ImageData image = ImageDataFactory.create(imgSrc);
 		Image imageModel = new Image(image);
 		int x, y = 0;
-		
-		x = (int)r.getX();
-		y = (int)r.getY();
-		
+
+		x = (int) r.getX();
+		y = (int) r.getY();
+
 		if (x < 35)
 			x = 35;
 		if (x > 547)

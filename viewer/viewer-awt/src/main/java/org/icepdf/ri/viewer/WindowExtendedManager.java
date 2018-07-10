@@ -83,22 +83,6 @@ public class WindowExtendedManager extends WindowManager {
 		}
 		return windowManager;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.icepdf.ri.viewer.WindowManager#quit(org.icepdf.ri.common.views.Controller, javax.swing.JFrame, java.util.prefs.Preferences)
-	 */
-	public void quit(Controller controller, JFrame viewer, Preferences preferences) {
-		saveViewerState(viewer);
-
-		// make sure all the controllers have been disposed.
-		for (Controller c : controllers) {
-			if (c == null)
-				continue;
-			c.dispose();
-		}
-		FileSystemManager.getInstance().deleteOnExit();
-		System.exit(0);
-	}
 
 	/* (non-Javadoc)
 	 * @see org.icepdf.ri.viewer.WindowManager#commonWindowCreation()

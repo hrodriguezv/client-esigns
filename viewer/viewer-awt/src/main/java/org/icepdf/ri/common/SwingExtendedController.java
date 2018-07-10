@@ -20,15 +20,23 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 
+import org.icepdf.ri.common.utility.queue.ListenerMessageSender;
+import org.icepdf.ri.common.utility.queue.ListenerQueueConfig;
 import org.icepdf.ri.common.views.DocumentViewController;
 import org.icepdf.ri.common.views.DocumentViewControllerExtendedImpl;
 import org.icepdf.ri.common.views.DocumentViewControllerImpl;
 import org.icepdf.ri.common.views.DocumentViewModelImpl;
 import org.icepdf.ri.images.Images;
 
+import com.consultec.esigns.core.io.FileSystemManager;
+import com.consultec.esigns.core.model.PayloadTO;
+import com.consultec.esigns.core.model.PayloadTO.Stage;
+import com.consultec.esigns.core.util.MQUtility;
 import com.consultec.esigns.core.util.WMICUtil;
 import com.consultec.esigns.strokes.api.IStrokeSignature;
 import com.consultec.esigns.strokes.io.FeatureNotImplemented;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class SwingExtendedController.
@@ -49,6 +57,10 @@ public class SwingExtendedController extends SwingController {
 	/** The swap button. */
 	private JButton okButton;
 
+	/** The reset button. */
+	private JButton resetButton;
+
+	
 	/** The current screen. */
 	private int currentScreen;
 
@@ -105,10 +117,8 @@ public class SwingExtendedController extends SwingController {
 	/**
 	 * Show on screen.
 	 *
-	 * @param screen
-	 *            the screen
-	 * @param frame
-	 *            the frame
+	 * @param screenEnum the screen enum
+	 * @param frame            the frame
 	 */
 	public void showOnScreen(Screen screenEnum, Frame frame) {
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -133,7 +143,7 @@ public class SwingExtendedController extends SwingController {
 	 */
 	private void setDefaultStrokeProvider() {
 		try {
-			List<String> devices = WMICUtil.getAdditionalDevicesConnected();
+			List<String> devices = WMICUtil.getRawDevicesConnected();
 			ServiceLoader<IStrokeSignature> loader = ServiceLoader.load(IStrokeSignature.class);
 			loader.forEach(new Consumer<IStrokeSignature>() {
 				public void accept(IStrokeSignature arg0) {
@@ -152,7 +162,7 @@ public class SwingExtendedController extends SwingController {
 				((DocumentViewControllerExtendedImpl) documentViewController).setSignatureVendor(vendor);
 			} else
 				throw new FeatureNotImplemented("No signature strokes vendor-implementation was found");
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.log(Level.FINE, "Error loading IStrokeSignature services: " + e.getMessage(), e);
 			org.icepdf.ri.util.Resources.showMessageDialog(viewer, JOptionPane.INFORMATION_MESSAGE, messageBundle,
 					"viewer.dialog.error.exception.title", "viewer.dialog.error.exception.msg",
@@ -190,6 +200,16 @@ public class SwingExtendedController extends SwingController {
 	 */
 	public void setOkButton(JButton btn) {
 		okButton = btn;
+		btn.addActionListener(this);
+	}
+	
+	/**
+	 * Sets the reset button.
+	 *
+	 * @param btn the new reset button
+	 */
+	public void setResetButton(JButton btn) {
+		resetButton = btn;
 		btn.addActionListener(this);
 	}
 
@@ -310,15 +330,46 @@ public class SwingExtendedController extends SwingController {
 
 		if (source == swapButton) {
 			swapScreens();
-		} else if (source == okButton) {
+		} else if (source == resetButton){
 			int dialogResult = JOptionPane.showConfirmDialog(viewer,
-					"Acaba de realizar la revisión del documento. Desea enviar el contenido para revisión en el banco?",
+					"Desea limpiar las firmas realizadas hasta el momento?",
 					"Pregunta", JOptionPane.YES_NO_OPTION);
 			if (dialogResult == JOptionPane.YES_OPTION) {
-				JOptionPane.showMessageDialog(viewer, "Archivo enviado satisfactoriamente", "Información",
-						JOptionPane.INFORMATION_MESSAGE);
-				System.err.println("Sending and exit");
-				windowManagementCallback.disposeWindow(this, viewer, propertiesManager.getPreferences());
+				this.openDocument(FileSystemManager.getInstance().getPdfDocument().getAbsolutePath());
+			}
+		} if (source == okButton) {
+			
+			if (!FileSystemManager.getInstance().getPdfStrokedDoc().exists()) {
+				JOptionPane.showMessageDialog(viewer, "Archivo PDF firmado con trazos, no existe. No se puede realizar el env\u00edo", "Informaci\u00f3n",
+						JOptionPane.ERROR_MESSAGE);
+			}else{
+				int dialogResult = JOptionPane.showConfirmDialog(viewer,
+						"Acaba de realizar la revisi\u00f3n del documento. Desea enviar el contenido para revisi\u00f3n en el banco?",
+						"Pregunta", JOptionPane.YES_NO_OPTION);
+				if (dialogResult == JOptionPane.YES_OPTION) {
+					PayloadTO post = new PayloadTO();
+					post.setSessionID(FileSystemManager.getInstance().getSessionId());
+					post.setStage(Stage.MANUAL_SIGNED);
+					ObjectMapper objectMapper = new ObjectMapper();
+					String pckg = null;
+					try {
+						pckg = objectMapper.writeValueAsString(post);
+					} catch (JsonProcessingException e) {
+						logger.log(Level.WARNING, "There was an error trying to parse PayloadTO", e);
+						e.printStackTrace();
+					}
+					try{
+						MQUtility.sendMessageMQ(ListenerQueueConfig.class, ListenerMessageSender.class, pckg);
+						JOptionPane.showMessageDialog(viewer, "Archivo enviado satisfactoriamente", "Informaci\u00f3n",
+								JOptionPane.INFORMATION_MESSAGE);
+						windowManagementCallback.disposeWindow(this, viewer, propertiesManager.getPreferences());
+					}catch(Exception e) {
+						logger.log(Level.WARNING, "There was an error trying to connect with the local server to send package", e);
+						e.printStackTrace();
+						JOptionPane.showMessageDialog(viewer, "Hubo un error al intentar enviar el paquete de datos. No se puede realizar el env\u00edo", "Informaci\u00f3n",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				}
 			}
 		}
 
@@ -347,11 +398,14 @@ public class SwingExtendedController extends SwingController {
 	private void applySettingsOnButtons(Screen screenEnum) {
 		String imageName = (screenEnum.equals(Screen.EXTENDED) ? "swapd" : "swapi");
 		String imageSize = "_32";
+		
 		swapButton.setIcon(new ImageIcon(Images.get(imageName + "_a" + imageSize + ".png")));
 		swapButton.setPressedIcon(new ImageIcon(Images.get(imageName + "_i" + imageSize + ".png")));
 		swapButton.setRolloverIcon(new ImageIcon(Images.get(imageName + "_r" + imageSize + ".png")));
 		swapButton.setDisabledIcon(new ImageIcon(Images.get(imageName + "_i" + imageSize + ".png")));
+
 		okButton.setVisible(!screenEnum.equals(Screen.EXTENDED));
+		resetButton.setVisible(!screenEnum.equals(Screen.EXTENDED));
 		signButton.setVisible(!screenEnum.equals(Screen.MAIN));
 	}
 

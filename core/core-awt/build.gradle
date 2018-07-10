@@ -109,8 +109,11 @@ dependencies {
     compile 'com.twelvemonkeys.imageio:imageio-tiff:'  + "${MONKEY_VERSION}"
     // compile 'com.github.jai-imageio:jai-imageio-jpeg2000:' + "${JAI_VERSION}"
     compile 'org.apache.pdfbox:jbig2-imageio:' + "${JBIG2_VERSION}"
+    compile 'org.springframework:spring-aop:5.0.7.RELEASE'
     compile 'com.itextpdf:itext7-core:7.0.4'
-    compile files('libs/com.consultec.esigns.core-1.0-SNAPSHOT.jar')
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
+    compile 'org.apache.activemq:activemq-all:5.15.0'
+	compile files('libs/com.consultec.esigns.core-1.0-SNAPSHOT.jar')
     compile files('libs/com.consultec.esigns.strokes.api-1.0-SNAPSHOT.jar')
     //added Wacom implementation API and drivers	
     compile files('libs/com.consultec.esigns.strokes.impl.wacom-1.0-SNAPSHOT.jar')

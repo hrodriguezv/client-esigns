@@ -129,6 +129,7 @@ public class PropertiesManager {
     public static final String PROPERTY_SHOW_UTILITY_SIGN = "application.toolbar.show.utility.sign";
     public static final String PROPERTY_SHOW_UTILITY_SWAP = "application.toolbar.show.utility.swap";
     public static final String PROPERTY_SHOW_UTILITY_OK = "application.toolbar.show.utility.ok";
+	public static final String PROPERTY_SHOW_UTILITY_RESET = "application.toolbar.show.utility.reset";    
     // properties used to hide/show utility pane tabs
     public static final String PROPERTY_HIDE_UTILITYPANE = "application.utilitypane.hide";
     public static final String PROPERTY_SHOW_UTILITYPANE_BOOKMARKS = "application.utilitypane.show.bookmarks";

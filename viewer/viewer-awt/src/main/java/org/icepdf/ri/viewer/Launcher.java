@@ -65,7 +65,7 @@ public class Launcher {
 
 	public static void main(String[] argv) {
 
-		boolean brokenUsage = false;
+		boolean brokenUsage = true;
 
 		String contentURL = "";
 		String contentFile = "";
@@ -80,12 +80,15 @@ public class Launcher {
 			switch (arg) {
 			case "-loadfile":
 				contentFile = argv[++i].trim();
+				brokenUsage=!brokenUsage;
 				break;
 			case "-loadurl":
 				contentURL = argv[++i].trim();
+				brokenUsage=!brokenUsage;
 				break;
 			case "-sessionid":
 				sessionId = argv[++i].trim();
+				brokenUsage=!brokenUsage;
 				break;
 			default:
 				brokenUsage = true;

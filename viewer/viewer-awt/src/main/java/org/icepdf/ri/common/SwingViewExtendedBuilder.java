@@ -92,6 +92,21 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 		return btn;
 	}
 	
+	/**
+	 * Builds the reset button.
+	 *
+	 * @return the j button
+	 */
+	public JButton buildResetButton() {
+		JButton btn = makeToolbarButton("Limpiar Cambios", "Limpiar Cambios", "reset", iconSize,
+				buttonFont);
+		if (viewerController != null && btn != null)
+			((SwingExtendedController) viewerController).setResetButton(btn);
+		return btn;
+	}
+	
+	
+	
 	/* (non-Javadoc)
 	 * @see org.icepdf.ri.common.SwingViewBuilder#buildUtilityToolBar(boolean, org.icepdf.ri.util.PropertiesManager)
 	 */
@@ -106,6 +121,9 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 		if ((!embeddableComponent)
 				&& (propertiesManager.checkAndStoreBooleanProperty(PropertiesManager.PROPERTY_SHOW_UTILITY_SWAP)))
 			addToToolBar(toolbar, buildSwapButton());
+		if ((!embeddableComponent)
+				&& (propertiesManager.checkAndStoreBooleanProperty(PropertiesManager.PROPERTY_SHOW_UTILITY_RESET)))
+			addToToolBar(toolbar, buildResetButton());
 		if ((!embeddableComponent)
 				&& (propertiesManager.checkAndStoreBooleanProperty(PropertiesManager.PROPERTY_SHOW_UTILITY_OK)))
 			addToToolBar(toolbar, buildOkButton());

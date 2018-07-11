@@ -1,7 +1,5 @@
 package org.icepdf.ri.common.utility.queue;
 
-import java.util.prefs.Preferences;
-
 import javax.jms.ConnectionFactory;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -25,8 +23,7 @@ import com.consultec.esigns.core.queue.IQueueConfig;
 public class ListenerQueueConfig implements IQueueConfig {
 
 	/** The Constant QUEUE_NAME. */
-	public static final String QUEUE_NAME = PropertiesManager.getInstance().getPreferences()
-			.get(PropertiesManager.QUEUE_SERVER_NAME, null);
+	public static final String QUEUE_NAME = PropertiesManager.getInstance().getValue(PropertiesManager.QUEUE_SERVER_NAME);
 
 	/*
 	 * (non-Javadoc)
@@ -35,9 +32,9 @@ public class ListenerQueueConfig implements IQueueConfig {
 	 */
 	@Bean
 	public ConnectionFactory connectionFactory() {
-		Preferences pref = PropertiesManager.getInstance().getPreferences();
-		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(pref.get(PropertiesManager.QUEUE_SERVER_HOST, null) + ":"
-				+ pref.get(PropertiesManager.QUEUE_SERVER_PORT, null));
+		PropertiesManager props = PropertiesManager.getInstance();
+		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(PropertiesManager.getInstance().getValue(PropertiesManager.QUEUE_SERVER_HOST) + ":"
+				+ props.getValue(PropertiesManager.QUEUE_SERVER_PORT));
 		return connectionFactory;
 	}
 

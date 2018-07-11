@@ -48,10 +48,10 @@ public class ListenerMessageSender implements IMessageSender {
 	 */
 	public void sendMessage(final String message) {
 		logger.info("sending to ["
-				+ PropertiesManager.getInstance().getPreferences().get(PropertiesManager.QUEUE_SERVER_NAME, null) + "]"
+				+ PropertiesManager.getInstance().getValue(PropertiesManager.QUEUE_SERVER_NAME) + "]"
 				+ message);
 		jmsTemplate.send(
-				PropertiesManager.getInstance().getPreferences().get(PropertiesManager.QUEUE_SERVER_NAME, null),
+				PropertiesManager.getInstance().getValue(PropertiesManager.QUEUE_SERVER_NAME),
 				new MessageCreator() {
 					public Message createMessage(Session session) throws JMSException {
 						return session.createTextMessage(message);

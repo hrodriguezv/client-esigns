@@ -64,6 +64,7 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 		super(documentViewController, pageViewComponent);
 		if (documentViewController instanceof DocumentViewControllerExtendedImpl) {
 			this.signProvider = ((DocumentViewControllerExtendedImpl) documentViewController).getSignatureVendor();
+			this.signProvider.setParameters(null, SIGNATURE_REASON, "Panama");
 		}
 	}
 

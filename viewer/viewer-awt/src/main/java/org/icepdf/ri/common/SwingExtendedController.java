@@ -335,6 +335,7 @@ public class SwingExtendedController extends SwingController {
 					"Desea limpiar las firmas realizadas hasta el momento?",
 					"Pregunta", JOptionPane.YES_NO_OPTION);
 			if (dialogResult == JOptionPane.YES_OPTION) {
+				FileSystemManager.getInstance().getPdfStrokedDoc().delete();
 				this.openDocument(FileSystemManager.getInstance().getPdfDocument().getAbsolutePath());
 			}
 		} if (source == okButton) {

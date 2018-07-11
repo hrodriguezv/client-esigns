@@ -38,16 +38,15 @@ import com.twelvemonkeys.io.FileUtil;
 public class SignatureStrokesHandler extends CommonToolHandler implements ToolHandler {
 
 	/** The Constant IMAGE_SRC_NAME. */
-	final static String STROKE_SRC_NAME = PropertiesManager.getInstance().getPreferences()
-			.get(PropertiesManager.PROPERTY_USER_STROKE_FILENAME, null);
+	final static String STROKE_SRC_NAME = PropertiesManager.getInstance().getValue(PropertiesManager.PROPERTY_USER_STROKE_FILENAME);
 
 	/** The Constant IMAGE_SRC_EXT. */
-	final static String IMAGE_SRC_EXT = PropertiesManager.getInstance().getPreferences()
-			.get(PropertiesManager.PROPERTY_USER_STROKE_IMGEXT, null);
+	final static String IMAGE_SRC_EXT = PropertiesManager.getInstance().getValue(PropertiesManager.PROPERTY_USER_STROKE_IMGEXT);
 
 	/** The Constant TEXT_SRC_EXT. */
-	final static String TEXT_SRC_EXT = PropertiesManager.getInstance().getPreferences()
-			.get(PropertiesManager.PROPERTY_USER_STROKE_TEXTEXT, null);
+	final static String TEXT_SRC_EXT = PropertiesManager.getInstance().getValue(PropertiesManager.PROPERTY_USER_STROKE_TEXTEXT);
+
+	final static String SIGNATURE_REASON = PropertiesManager.getInstance().getValue(PropertiesManager.PROPERTY_USER_STROKE_REASON);
 
 	/** The sign. */
 	private IStrokeSignature signProvider;
@@ -135,15 +134,14 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 
 		String pathFile = pdfDocument.getAbsolutePath();
 		String pathOutputFile = strokedDocument.getAbsolutePath();
-		String dateFmask = PropertiesManager.getInstance().getPreferences()
-				.get(PropertiesManager.DEFAULT_FORMATTER_MASK, null);
+		String dateFmask = PropertiesManager.getInstance().getValue(PropertiesManager.DEFAULT_FORMATTER_MASK);
 
 		AffineTransform pageInverseTransform = getPageTransform();
 		Dimension scaledSize = new Dimension((int) Math.abs(2 * pageInverseTransform.getScaleX()),
 				(int) Math.abs(2 * pageInverseTransform.getScaleY()));
 
 		// convert bbox and start and end line points.
-		Rectangle bBox = new Rectangle(arg0.getX(), arg0.getY(), scaledSize.width, scaledSize.height);
+		Rectangle bBox = new Rectangle(arg0.getX(), arg0.getY(), scaledSize.width, scaledSize.height);	
 		Rectangle tBbox = convertToPageSpace(bBox).getBounds();
 
 		try {

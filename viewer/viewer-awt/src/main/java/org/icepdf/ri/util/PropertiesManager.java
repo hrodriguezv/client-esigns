@@ -614,6 +614,9 @@ public class PropertiesManager {
     public static final String PROPERTY_USER_STROKE_IMGEXT = "user.default.strokeimgextension";
     /** The Constant PROPERTY_USER_STROKE_TEXTEXT. */
     public static final String PROPERTY_USER_STROKE_TEXTEXT = "user.default.stroketxtextension";
+
+    public static final String PROPERTY_USER_STROKE_REASON = "stroke.reason.value";
+
     /** The Constant DEFAULT_FORMATTER_MASK. */
     public static final String DEFAULT_FORMATTER_MASK = "stroke.dateformatter.timestamp";
     /** The Constant QUEUE_SERVER_NAME. */
@@ -1062,5 +1065,15 @@ public class PropertiesManager {
         }
     }
 
+    
+    /**
+     * Gets the value.
+     *
+     * @param key the key
+     * @return the value
+     */
+    public String getValue(String key) {
+    	return propertiesManager.defaultProps.getProperty(key);
+    }
 }
 

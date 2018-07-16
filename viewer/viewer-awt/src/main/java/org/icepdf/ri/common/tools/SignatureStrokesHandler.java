@@ -14,9 +14,11 @@ import java.text.SimpleDateFormat;
 
 import org.icepdf.core.pobjects.Destination;
 import org.icepdf.ri.common.SwingController;
+import org.icepdf.ri.common.SwingExtendedController;
 import org.icepdf.ri.common.views.AbstractPageViewComponent;
 import org.icepdf.ri.common.views.DocumentViewController;
 import org.icepdf.ri.common.views.DocumentViewControllerExtendedImpl;
+import org.icepdf.ri.common.views.DocumentViewModelImpl;
 import org.icepdf.ri.util.PropertiesManager;
 
 import com.consultec.esigns.core.io.FileSystemManager;
@@ -173,6 +175,8 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 				controller.getDocumentViewController().setDestinationTarget(
 						new Destination(controller.getDocument().getPageTree().getPage(--currentPage), (int) bounds.x,
 								(int) (bounds.y + bounds.height + 100)));
+			} else {
+				((SwingExtendedController)documentViewController.getParentController()).setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_PAN);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

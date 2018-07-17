@@ -351,6 +351,9 @@ public class SwingExtendedController extends SwingController {
 					setDocumentToolMode(
 						DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION);
 				}
+				else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					tool = DocumentViewModelImpl.DISPLAY_TOOL_PAN;
+				}
 			}
 		}
 		finally {

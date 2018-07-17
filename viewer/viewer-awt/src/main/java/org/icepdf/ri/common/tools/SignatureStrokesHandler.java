@@ -255,16 +255,7 @@ public class SignatureStrokesHandler extends CommonToolHandler implements ToolHa
 		x = (int) r.getX();
 		y = (int) r.getY();
 
-		if (x < 35)
-			x = 35;
-		if (x > 547)
-			x = 400;
-		if (y > 580)
-			y = 580;
-		if (y < 35)
-			y = 35;
-
-		AffineTransform at = AffineTransform.getTranslateInstance(x, y);
+		AffineTransform at = AffineTransform.getTranslateInstance(x, y-65);
 		at.concatenate(
 				AffineTransform.getScaleInstance(imageModel.getImageScaledWidth(), imageModel.getImageScaledHeight()));
 		PdfCanvas canvas = new PdfCanvas(pdfDoc.getPage(currentPage));

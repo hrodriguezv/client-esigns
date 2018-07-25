@@ -37,7 +37,7 @@ import org.icepdf.ri.common.tools.InkAnnotationHandler;
 import org.icepdf.ri.common.tools.LineAnnotationHandler;
 import org.icepdf.ri.common.tools.LineArrowAnnotationHandler;
 import org.icepdf.ri.common.tools.LinkAnnotationHandler;
-import org.icepdf.ri.common.tools.SignatureStrokesHandler;
+import org.icepdf.ri.common.tools.PanningExtendedHandler;
 import org.icepdf.ri.common.tools.SquareAnnotationHandler;
 import org.icepdf.ri.common.tools.StrikeOutAnnotationHandler;
 import org.icepdf.ri.common.tools.TextAnnotationHandler;
@@ -218,8 +218,8 @@ public class PageViewComponentImpl extends AbstractPageViewComponent implements 
                         documentViewController, this);
                 documentViewController.clearSelectedText();
                 break;
-            case DocumentViewModel.DISPLAY_TOOL_SIGNATURE_SELECTION: 
-                currentToolHandler = new SignatureStrokesHandler(
+            case DocumentViewModel.DISPLAY_TOOL_PAN_EXTENDED: 
+                currentToolHandler = new PanningExtendedHandler(
                         documentViewController, this);
                 documentViewController.clearSelectedText();
                 break;

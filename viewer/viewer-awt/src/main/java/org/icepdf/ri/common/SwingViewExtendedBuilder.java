@@ -9,7 +9,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
@@ -51,19 +50,6 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 		if (viewerController != null)
 			viewerController.setViewerFrame(viewer);
 		return viewer;
-	}
-
-	/**
-	 * Builds the sign button.
-	 *
-	 * @return the j toggle button
-	 */
-	public JToggleButton buildSignButton() {
-		JToggleButton btn = makeToolbarToggleButton("Firmar Documento", "Firmar Documento", "signature", iconSize,
-				buttonFont);
-		if (viewerController != null && btn != null)
-			((SwingExtendedController) viewerController).setSignButton(btn);
-		return btn;
 	}
 
 	/**
@@ -115,9 +101,6 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 		commonToolBarSetup(toolbar, false);
 		// if embeddable component, we don't want to create the open dialog, as we
 		// have no window manager for this case.
-		if ((!embeddableComponent)
-				&& (propertiesManager.checkAndStoreBooleanProperty(PropertiesManager.PROPERTY_SHOW_UTILITY_SIGN)))
-			addToToolBar(toolbar, buildSignButton());
 		if ((!embeddableComponent)
 				&& (propertiesManager.checkAndStoreBooleanProperty(PropertiesManager.PROPERTY_SHOW_UTILITY_SWAP)))
 			addToToolBar(toolbar, buildSwapButton());

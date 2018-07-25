@@ -114,20 +114,16 @@ public interface DocumentViewModel {
     /**
      * Display tool constant for creating new digital stroked signature .
      */
-    int DISPLAY_TOOL_SIGNATURE_SELECTION = 20;
-    /**
-     * Display tool constant for creating new digital stroked signature .
-     */
     int DISPLAY_TOOL_SWAP_SELECTION = 22;
 
-    /**
-     * Display tool constant for setting no tools
-     */
+    /** Display tool constant for setting no tools. */
     int DISPLAY_TOOL_NONE = 50;
-    /**
-     * Display tool constant for showing user that gui is busy
-     */
+    
+    /** Display tool constant for showing user that gui is busy. */
     int DISPLAY_TOOL_WAIT = 51;
+    
+    /** The display tool pan extended. */
+    int DISPLAY_TOOL_PAN_EXTENDED = 101;
 
     /**
      * Gets the PDF document object associated with this views.
@@ -288,7 +284,7 @@ public interface DocumentViewModel {
     AnnotationComponent getCurrentAnnotation();
 
     /**
-     * Sets teh current annotation
+     * Sets the current annotation
      *
      * @param currentAnnotation annotation to set as current
      */
@@ -303,8 +299,18 @@ public interface DocumentViewModel {
     void addMemento(Memento oldMementoState,
                     Memento newMementoState);
 
+    /**
+     * Gets the document view scroll pane.
+     *
+     * @return the document view scroll pane
+     */
     JScrollPane getDocumentViewScrollPane();
 
+    /**
+     * Sets the document view scroll pane.
+     *
+     * @param documentViewScrollPane the new document view scroll pane
+     */
     void setDocumentViewScrollPane(JScrollPane documentViewScrollPane);
 
 }

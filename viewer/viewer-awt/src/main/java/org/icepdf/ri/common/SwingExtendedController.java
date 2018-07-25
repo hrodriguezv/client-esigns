@@ -8,8 +8,6 @@ import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
@@ -19,7 +17,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JToggleButton;
 
 import org.icepdf.ri.common.utility.queue.ListenerMessageSender;
 import org.icepdf.ri.common.utility.queue.ListenerQueueConfig;
@@ -33,7 +30,7 @@ import com.consultec.esigns.core.io.FileSystemManager;
 import com.consultec.esigns.core.model.PayloadTO;
 import com.consultec.esigns.core.model.PayloadTO.Stage;
 import com.consultec.esigns.core.util.MQUtility;
-import com.consultec.esigns.core.util.WMICUtil;
+import com.consultec.esigns.strokes.SignaturePadVendor;
 import com.consultec.esigns.strokes.api.IStrokeSignature;
 import com.consultec.esigns.strokes.io.FeatureNotImplemented;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,9 +42,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author hrodriguez
  */
 public class SwingExtendedController extends SwingController {
-
-	/** The sign button. */
-	private JToggleButton signButton;
 
 	/** The vendor. */
 	private IStrokeSignature vendor;
@@ -157,17 +151,13 @@ public class SwingExtendedController extends SwingController {
 	private void setDefaultStrokeProvider() {
 
 		try {
-			List<String> devices = WMICUtil.getRawDevicesConnected();
+			// List<String> devices = WMICUtil.getRawDevicesConnected();
 			ServiceLoader<IStrokeSignature> loader =
 				ServiceLoader.load(IStrokeSignature.class);
 			loader.forEach(new Consumer<IStrokeSignature>() {
-
 				public void accept(IStrokeSignature arg0) {
-
-					for (String device : devices) {
-						if (arg0.getVendor().getVendorID().equals(device)) {
-							vendor = arg0;
-						}
+					if (arg0.getVendor().equals(SignaturePadVendor.WACOM)) {
+						vendor = arg0;
 					}
 				}
 			});
@@ -195,19 +185,8 @@ public class SwingExtendedController extends SwingController {
 				viewer,
 				"No se ha detectado ning\u00fAn dispositivo de firma digital conectado, por lo tanto no puede realizar ninguna operaci\u00f3n sobre el documento",
 				"Informaci\u00f3n", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Sets the sign button.
-	 *
-	 * @param btn
-	 *            the new sign button
-	 */
-	public void setSignButton(JToggleButton btn) {
-
-		signButton = btn;
-		btn.addItemListener(this);
 	}
 
 	/**
@@ -255,13 +234,6 @@ public class SwingExtendedController extends SwingController {
 
 		boolean actualToolMayHaveChanged = false;
 
-		if (argToolName == DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION) {
-			actualToolMayHaveChanged = documentViewController.setToolMode(
-				DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION);
-			documentViewController.setViewCursor(
-				DocumentViewController.CURSOR_CROSSHAIR);
-			setCursorOnComponents(DocumentViewController.CURSOR_DEFAULT);
-		}
 		if (argToolName == DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION) {
 			actualToolMayHaveChanged = documentViewController.setToolMode(
 				DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION);
@@ -288,9 +260,9 @@ public class SwingExtendedController extends SwingController {
 	public void openDocument(String pathname) {
 
 		super.openDocument(pathname);
-		// added recently
 		setPageViewMode(DocumentViewControllerImpl.ONE_COLUMN_VIEW, false);
 		setPageFitMode(DocumentViewController.PAGE_FIT_WINDOW_WIDTH, false);
+		setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
 		showOnScreen(Screen.EXTENDED, viewer);
 	}
 
@@ -320,45 +292,8 @@ public class SwingExtendedController extends SwingController {
 
 		super.reflectToolInToolButtons();
 		reflectSelectionInButton(
-			signButton, documentViewController.isToolModeSelected(
-				DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION));
-		reflectSelectionInButton(
 			switchButton, documentViewController.isToolModeSelected(
 				DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * org.icepdf.ri.common.SwingController#itemStateChanged(java.awt.event.
-	 * ItemEvent)
-	 */
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-
-		super.itemStateChanged(e);
-		Object source = e.getSource();
-		if (source == null)
-			return;
-
-		int tool = getDocumentViewToolMode();
-		setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
-		try {
-			if (source == signButton) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					tool =
-						DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION;
-					setDocumentToolMode(
-						DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION);
-				}
-				else if (e.getStateChange() == ItemEvent.DESELECTED) {
-					tool = DocumentViewModelImpl.DISPLAY_TOOL_PAN;
-				}
-			}
-		}
-		finally {
-			setDisplayTool(tool);
-		}
 	}
 
 	/*
@@ -471,7 +406,6 @@ public class SwingExtendedController extends SwingController {
 			(screenEnum.equals(Screen.EXTENDED) ? "swapd" : "swapi");
 		String imageSize = "_32";
 
-		boolean isExtended = !screenEnum.equals(Screen.MAIN);
 		boolean isMain = !screenEnum.equals(Screen.EXTENDED);
 		boolean isVendorFound = vendor != null;
 
@@ -488,13 +422,16 @@ public class SwingExtendedController extends SwingController {
 			new ImageIcon(
 				Images.get(switchImageName + "_i" + imageSize + ".png")));
 
-		okButton.setVisible(isMain);
-		resetButton.setVisible(isMain);
-		signButton.setVisible(isExtended);
+		if (okButton != null) {
+			okButton.setVisible(isMain);
+			okButton.setEnabled(isVendorFound);
+		}
 
-		okButton.setEnabled(isVendorFound);
-		resetButton.setEnabled(isVendorFound);
-		signButton.setEnabled(isVendorFound);
+		if (resetButton != null) {
+			resetButton.setVisible(isMain);
+			resetButton.setEnabled(isVendorFound);
+		}
+		
 	}
 
 	/**

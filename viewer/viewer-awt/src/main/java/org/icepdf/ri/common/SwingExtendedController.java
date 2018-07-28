@@ -8,6 +8,7 @@ import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
@@ -30,6 +31,8 @@ import com.consultec.esigns.core.io.FileSystemManager;
 import com.consultec.esigns.core.model.PayloadTO;
 import com.consultec.esigns.core.model.PayloadTO.Stage;
 import com.consultec.esigns.core.util.MQUtility;
+import com.consultec.esigns.core.util.PropertiesManager;
+import com.consultec.esigns.core.util.WMICUtil;
 import com.consultec.esigns.strokes.SignaturePadVendor;
 import com.consultec.esigns.strokes.api.IStrokeSignature;
 import com.consultec.esigns.strokes.io.FeatureNotImplemented;
@@ -150,17 +153,34 @@ public class SwingExtendedController extends SwingController {
 	 */
 	private void setDefaultStrokeProvider() {
 
+		boolean forceLoadingProvider = Boolean.parseBoolean(
+			PropertiesManager.getInstance().getValue(
+				"forceload.stroke.provider.implementation"));
+
 		try {
-			// List<String> devices = WMICUtil.getRawDevicesConnected();
+			Consumer<IStrokeSignature> consumer = null;
 			ServiceLoader<IStrokeSignature> loader =
 				ServiceLoader.load(IStrokeSignature.class);
-			loader.forEach(new Consumer<IStrokeSignature>() {
-				public void accept(IStrokeSignature arg0) {
-					if (arg0.getVendor().equals(SignaturePadVendor.WACOM)) {
+			if (forceLoadingProvider) {
+				consumer = arg0 -> {
+					if (arg0.getVendor().getVendorID().equals(
+						SignaturePadVendor.WACOM.getVendorID())) {
 						vendor = arg0;
 					}
-				}
-			});
+				};
+			}
+			else {
+				List<String> devices = WMICUtil.getRawDevicesConnected();
+				consumer = arg0 -> {
+					for (String device : devices) {
+						if (arg0.getVendor().getVendorID().equals(device)) {
+							vendor = arg0;
+						}
+					}
+				};
+			}
+
+			loader.forEach(consumer);
 
 			logger.info(
 				"Signature strokes vendorID found [" +
@@ -168,6 +188,7 @@ public class SwingExtendedController extends SwingController {
 
 			documentViewController =
 				new DocumentViewControllerExtendedImpl(this);
+
 			if (vendor != null) {
 				((DocumentViewControllerExtendedImpl) documentViewController).setSignatureVendor(
 					vendor);
@@ -390,7 +411,10 @@ public class SwingExtendedController extends SwingController {
 		Frame viewer = this.getViewerFrame();
 		int screen = this.getCurrentScreen();
 		Screen screenEnum = Screen.getAlternateScreen(screen);
+		if (screenEnum.equals(Screen.MAIN)) setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN);
+		else setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
 		this.showOnScreen(screenEnum, viewer);
+		setCursorOnComponents(CURSOR_DEFAULT);
 		return screenEnum;
 	}
 
@@ -431,7 +455,7 @@ public class SwingExtendedController extends SwingController {
 			resetButton.setVisible(isMain);
 			resetButton.setEnabled(isVendorFound);
 		}
-		
+
 	}
 
 	/**

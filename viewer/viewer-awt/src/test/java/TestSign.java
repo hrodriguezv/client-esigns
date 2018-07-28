@@ -2,22 +2,14 @@
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.Socket;
-import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.esf.OtherHashAlgAndValue;
-import org.bouncycastle.asn1.esf.SignaturePolicyId;
 import org.bouncycastle.asn1.esf.SignaturePolicyIdentifier;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import com.consultec.esigns.core.security.SecurityProvider;
+import com.consultec.esigns.core.security.SecurityHelper;
 import com.consultec.esigns.core.util.InetUtility;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -35,6 +27,8 @@ import com.itextpdf.signatures.PrivateKeySignature;
 import com.itextpdf.signatures.SignatureUtil;
 import com.itextpdf.signatures.TSAClientBouncyCastle;
 
+import sun.security.mscapi.SunMSCAPI;
+
 public class TestSign {
 
 	protected static final String BASEPATH = "C:\\Users\\hrodriguez\\Documents\\Consultec\\dev\\Firmas digitales\\recursos\\openssl\\test-realsec\\";
@@ -45,12 +39,16 @@ public class TestSign {
 	protected static final String BACK_IMG = BASEPATH + "sig.png";
 
 	public static void main(String[] args) throws IOException, GeneralSecurityException {
-		padesEpesProfileTest01();
+//		padesEpesProfileTest01();
+		SecurityHelper helper = new SecurityHelper();
+		helper.init(new SunMSCAPI(), SecurityHelper.WINDOWS_MY, null, null);
 	}
 
 	@SuppressWarnings("unused")
 	private static void signCMS() throws IOException, GeneralSecurityException {
-		SecurityProvider provider = new SecurityProvider(KEYSTORE, PASSWORD);
+		SecurityHelper helper = new SecurityHelper();
+		helper.init(new BouncyCastleProvider(), "pkcs12", KEYSTORE, PASSWORD);
+
 
 		PdfReader reader = new PdfReader(PDFIN);
 		PdfSigner signer = new PdfSigner(reader, new FileOutputStream(PDFOUT), false);
@@ -64,27 +62,28 @@ public class TestSign {
 				.setSignatureGraphic(ImageDataFactory.create(BACK_IMG));
 		// appearance.setImageScale(1);
 		// Creating the signature
-		IExternalSignature pks = new PrivateKeySignature(provider.getPrivateKey(), DigestAlgorithms.SHA512,
-				provider.getProviderName());
+		IExternalSignature pks = new PrivateKeySignature(helper.getPrivateKey(), DigestAlgorithms.SHA512,
+				helper.getProviderName());
 		IExternalDigest digest = new BouncyCastleDigest();
 		ITSAClient tsaClient = new TSAClientBouncyCastle("http://time.certum.pl/");
-		signer.signDetached(digest, pks, provider.getTrustedChain(), null, null, tsaClient, 0,
+		signer.signDetached(digest, pks, helper.getTrustedChain(), null, null, tsaClient, 0,
 				PdfSigner.CryptoStandard.CMS);
 	}
 
 	public static void padesEpesProfileTest01() throws IOException, GeneralSecurityException {
 		String alg = DigestAlgorithms.getAllowedDigest("SHA1");
-		SignaturePolicyIdentifier sigPolicyIdentifier = SecurityProvider.getPadesEpesProfile(alg);
+		SignaturePolicyIdentifier sigPolicyIdentifier = SecurityHelper.getPadesEpesProfile(alg);
 		signApproval(KEYSTORE, PDFOUT, sigPolicyIdentifier);
 		basicCheckSignedDoc(PDFOUT, "Signature1");
 	}
 
 	private static void signApproval(String signCertFileName, String outFileName,
 			SignaturePolicyIdentifier sigPolicyInfo) throws IOException, GeneralSecurityException {
-		SecurityProvider provider = new SecurityProvider(KEYSTORE, PASSWORD);
+		SecurityHelper helper = new SecurityHelper();
+		helper.init(new BouncyCastleProvider(), "pkcs12", KEYSTORE, PASSWORD);
 
-		Certificate[] signChain = provider.getTrustedChain();
-		PrivateKey signPrivateKey = provider.getPrivateKey();
+		Certificate[] signChain = helper.getTrustedChain();
+		PrivateKey signPrivateKey = helper.getPrivateKey();
 		IExternalSignature pks = new PrivateKeySignature(signPrivateKey, DigestAlgorithms.SHA256,
 				BouncyCastleProvider.PROVIDER_NAME);
 
@@ -96,7 +95,7 @@ public class TestSign {
 			  .setReason("Test")
 			  .setLocation("TestCity")
 			  .setLayer2Text("Approval test signature.")
-			  .setCertificate(provider.getCertificate());
+			  .setCertificate(helper.getCertificate());
 
 		
 		//http://213.37.154.21:12080/CryptosecOpenKey/tsa_service

@@ -414,7 +414,6 @@ public class SwingExtendedController extends SwingController {
 		if (screenEnum.equals(Screen.MAIN)) setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN);
 		else setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
 		this.showOnScreen(screenEnum, viewer);
-		setCursorOnComponents(CURSOR_DEFAULT);
 		return screenEnum;
 	}
 
@@ -455,7 +454,6 @@ public class SwingExtendedController extends SwingController {
 			resetButton.setVisible(isMain);
 			resetButton.setEnabled(isVendorFound);
 		}
-
 	}
 
 	/**

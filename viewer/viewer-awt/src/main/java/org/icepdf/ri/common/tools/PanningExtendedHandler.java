@@ -21,6 +21,7 @@ import org.icepdf.ri.common.views.DocumentViewModel;
 import org.icepdf.ri.common.views.DocumentViewModelImpl;
 import org.icepdf.ri.util.PropertiesManager;
 
+import com.consultec.esigns.core.util.WMICUtil;
 import com.consultec.esigns.strokes.api.IStrokeSignature;
 
 /**
@@ -67,11 +68,17 @@ public class PanningExtendedHandler extends CommonToolHandler
 			((DocumentViewControllerExtendedImpl) documentViewController).getDocumentViewModel();
 		this.signProvider =
 			((DocumentViewControllerExtendedImpl) documentViewController).getSignatureVendor();
-		this.signProvider.setParameters(null, SIGNATURE_REASON, "Panama");
 		this.currentPageChanger = new CurrentPageChanger(
 			documentViewModel.getDocumentViewScrollPane(),
 			(AbstractDocumentView) documentViewController.getDocumentView(),
 			documentViewModel.getPageComponents());
+		String user = null;
+		try {
+			user = WMICUtil.getLoggedUser();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		this.signProvider.setParameters(null, SIGNATURE_REASON.replaceAll("(0)", user!=null?user:""), "Ciudad de Panamá, Panamá");
 	}
 
 	/** KeyEvents can queue up, if the user holds down a key, causing us to do several page changes, unless we use flagging to ignore the extraneous KeyEvents. */

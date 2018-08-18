@@ -4,6 +4,7 @@
 
 package org.icepdf.ri.common;
 
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -14,7 +15,6 @@ import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -25,7 +25,6 @@ import org.icepdf.ri.common.views.DocumentViewController;
 import org.icepdf.ri.common.views.DocumentViewControllerExtendedImpl;
 import org.icepdf.ri.common.views.DocumentViewControllerImpl;
 import org.icepdf.ri.common.views.DocumentViewModelImpl;
-import org.icepdf.ri.images.Images;
 
 import com.consultec.esigns.core.io.FileSystemManager;
 import com.consultec.esigns.core.model.PayloadTO;
@@ -424,26 +423,30 @@ public class SwingExtendedController extends SwingController {
 	 *            the screen enum
 	 */
 	private void applySettingsOnButtons(Screen screenEnum) {
-
-		String switchImageName =
-			(screenEnum.equals(Screen.EXTENDED) ? "swapd" : "swapi");
-		String imageSize = "_32";
-
+		Color back = null;
+		Color fore = null;
+		String switchText = null;
 		boolean isMain = !screenEnum.equals(Screen.EXTENDED);
 		boolean isVendorFound = vendor != null;
 
-		switchButton.setIcon(
-			new ImageIcon(
-				Images.get(switchImageName + "_a" + imageSize + ".png")));
-		switchButton.setPressedIcon(
-			new ImageIcon(
-				Images.get(switchImageName + "_i" + imageSize + ".png")));
-		switchButton.setRolloverIcon(
-			new ImageIcon(
-				Images.get(switchImageName + "_r" + imageSize + ".png")));
-		switchButton.setDisabledIcon(
-			new ImageIcon(
-				Images.get(switchImageName + "_i" + imageSize + ".png")));
+		switch (screenEnum){
+		case EXTENDED:
+			back = SwingViewExtendedBuilder.ORANGE_BG;
+			fore = SwingViewExtendedBuilder.WHITE_BG;
+			switchText = "Finalizar";
+			break;
+		case MAIN:
+			back = SwingViewExtendedBuilder.WHITE_BG;
+			fore = SwingViewExtendedBuilder.BLUE_BG;
+			switchText = "Devolver";
+			break;
+		}
+
+		if (switchButton!=null) {
+			switchButton.setText(switchText);
+			switchButton.setBackground(back);
+			switchButton.setForeground(fore);
+		}
 
 		if (okButton != null) {
 			okButton.setVisible(isMain);

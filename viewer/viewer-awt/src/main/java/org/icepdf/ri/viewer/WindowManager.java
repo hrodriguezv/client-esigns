@@ -38,17 +38,13 @@ import org.icepdf.core.pobjects.Document;
 import org.icepdf.core.util.Defs;
 import org.icepdf.ri.common.MyAnnotationCallback;
 import org.icepdf.ri.common.SwingController;
-import org.icepdf.ri.common.SwingExtendedController;
 import org.icepdf.ri.common.SwingViewBuilder;
-import org.icepdf.ri.common.SwingViewExtendedBuilder;
 import org.icepdf.ri.common.ViewModel;
 import org.icepdf.ri.common.WindowManagementCallback;
 import org.icepdf.ri.common.views.Controller;
 import org.icepdf.ri.common.views.DocumentViewController;
 import org.icepdf.ri.common.views.DocumentViewControllerImpl;
 import org.icepdf.ri.util.PropertiesManager;
-
-import com.consultec.esigns.core.io.FileSystemManager;
 
 /**
  * An implementation of WindowManagementCallback to manage the viewer

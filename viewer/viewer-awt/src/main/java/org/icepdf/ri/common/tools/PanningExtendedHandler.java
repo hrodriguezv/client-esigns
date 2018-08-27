@@ -10,6 +10,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.text.MessageFormat;
 
 import org.icepdf.ri.common.CurrentPageChanger;
 import org.icepdf.ri.common.SwingExtendedController;
@@ -19,9 +20,9 @@ import org.icepdf.ri.common.views.DocumentViewController;
 import org.icepdf.ri.common.views.DocumentViewControllerExtendedImpl;
 import org.icepdf.ri.common.views.DocumentViewModel;
 import org.icepdf.ri.common.views.DocumentViewModelImpl;
-import org.icepdf.ri.util.PropertiesManager;
 
-import com.consultec.esigns.core.util.WMICUtil;
+import com.consultec.esigns.core.util.InetUtility;
+import com.consultec.esigns.core.util.PropertiesManager;
 import com.consultec.esigns.strokes.api.IStrokeSignature;
 
 /**
@@ -74,11 +75,13 @@ public class PanningExtendedHandler extends CommonToolHandler
 			documentViewModel.getPageComponents());
 		String user = null;
 		try {
-			user = WMICUtil.getLoggedUser();
+			user = InetUtility.getLoggedUserNameExt();			
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		this.signProvider.setParameters(null, SIGNATURE_REASON.replaceAll("(0)", user!=null?user:""), "Ciudad de Panamá, Panamá");
+        MessageFormat formatter = new MessageFormat(SIGNATURE_REASON);
+		String reason = formatter.format(new Object[]{user!=null?user:""});
+		this.signProvider.setParameters("Ciudad de Panamá, Panamá", reason, null);
 	}
 
 	/** KeyEvents can queue up, if the user holds down a key, causing us to do several page changes, unless we use flagging to ignore the extraneous KeyEvents. */

@@ -15,9 +15,9 @@ import org.icepdf.core.pobjects.Destination;
 import org.icepdf.ri.common.SwingExtendedController;
 import org.icepdf.ri.common.views.AbstractPageViewComponent;
 import org.icepdf.ri.common.views.DocumentViewController;
-import org.icepdf.ri.util.PropertiesManager;
 
 import com.consultec.esigns.core.io.FileSystemManager;
+import com.consultec.esigns.core.util.PropertiesManager;
 import com.consultec.esigns.strokes.api.IStrokeSignature;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;

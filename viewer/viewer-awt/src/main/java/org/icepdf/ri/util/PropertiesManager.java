@@ -28,7 +28,6 @@ import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
 
-// TODO: Auto-generated Javadoc
 /**
  * <p>This class provides a wrapper for persisting the viewer ri's settings. The
  * class also provides mechanisms for loading default properties. The class is
@@ -769,31 +768,6 @@ public class PropertiesManager {
 	// stored state of last used public/private annotation flag.
 	public static final String PROPERTY_ANNOTATION_LAST_USED_PUBLIC_FLAG =
 		"application.viewer.annotation.public.flag";
-
-	// extended properties
-	/** The Constant PROPERTY_USER_STROKE_IMGNAME. */
-	public static final String PROPERTY_USER_STROKE_FILENAME =
-		"user.default.strokefilebasename";
-	/** The Constant PROPERTY_USER_STROKE_IMGEXT. */
-	public static final String PROPERTY_USER_STROKE_IMGEXT =
-		"user.default.strokeimgextension";
-	/** The Constant PROPERTY_USER_STROKE_TEXTEXT. */
-	public static final String PROPERTY_USER_STROKE_TEXTEXT =
-		"user.default.stroketxtextension";
-
-	/** The Constant PROPERTY_USER_STROKE_REASON. */
-	public static final String PROPERTY_USER_STROKE_REASON =
-		"stroke.reason.value";
-
-	/** The Constant DEFAULT_FORMATTER_MASK. */
-	public static final String DEFAULT_FORMATTER_MASK =
-		"stroke.dateformatter.timestamp";
-	/** The Constant QUEUE_SERVER_NAME. */
-	public static final String QUEUE_SERVER_NAME = "apache.activeq.servername";
-	/** The Constant QUEUE_SERVER_HOST. */
-	public static final String QUEUE_SERVER_HOST = "apache.activeq.host";
-	/** The Constant QUEUE_SERVER_PORT. */
-	public static final String QUEUE_SERVER_PORT = "apache.activeq.port";
 
 	/** The properties manager. */
 	private static PropertiesManager propertiesManager;

@@ -334,8 +334,8 @@ public class SwingExtendedController extends SwingController {
 		}
 		else if (source == resetButton) {
 			int dialogResult = JOptionPane.showConfirmDialog(
-				viewer, "Desea limpiar las firmas realizadas hasta el momento?",
-				"Pregunta", JOptionPane.YES_NO_OPTION);
+				viewer, messageBundle.getString("bgsignature.window.back.message"),
+				messageBundle.getString("bgsignature.window.back.title"), JOptionPane.YES_NO_OPTION);
 			if (dialogResult == JOptionPane.YES_OPTION) {
 				FileSystemManager.getInstance().getPdfStrokedDoc().delete();
 				this.openDocument(
@@ -347,15 +347,10 @@ public class SwingExtendedController extends SwingController {
 			if (!FileSystemManager.getInstance().getPdfStrokedDoc().exists()) {
 				JOptionPane.showMessageDialog(
 					viewer,
-					"Archivo PDF firmado con trazos, no existe. No se puede realizar el env\u00edo",
-					"Informaci\u00f3n", JOptionPane.ERROR_MESSAGE);
+					messageBundle.getString("bgsignature.window.errorstrokes.message"),
+					messageBundle.getString("bgsignature.window.errorstrokes.title"), JOptionPane.ERROR_MESSAGE);
 			}
 			else {
-				int dialogResult = JOptionPane.showConfirmDialog(
-					viewer,
-					"Acaba de realizar la revisi\u00f3n del documento. Desea enviar el contenido para revisi\u00f3n en el banco?",
-					"Pregunta", JOptionPane.YES_NO_OPTION);
-				if (dialogResult == JOptionPane.YES_OPTION) {
 					PayloadTO post = new PayloadTO();
 					post.setSessionID(
 						FileSystemManager.getInstance().getSessionId());
@@ -375,10 +370,6 @@ public class SwingExtendedController extends SwingController {
 						MQUtility.sendMessageMQ(
 							ListenerQueueConfig.class,
 							ListenerMessageSender.class, pckg);
-						JOptionPane.showMessageDialog(
-							viewer, "Archivo enviado satisfactoriamente",
-							"Informaci\u00f3n",
-							JOptionPane.INFORMATION_MESSAGE);
 						windowManagementCallback.disposeWindow(
 							this, viewer, propertiesManager.getPreferences());
 					}
@@ -390,13 +381,11 @@ public class SwingExtendedController extends SwingController {
 						e.printStackTrace();
 						JOptionPane.showMessageDialog(
 							viewer,
-							"Hubo un error al intentar enviar el paquete de datos. No se puede realizar el env\u00edo",
-							"Informaci\u00f3n", JOptionPane.ERROR_MESSAGE);
+							messageBundle.getString("bgsignature.window.error.message"),
+							messageBundle.getString("bgsignature.window.error.title"), JOptionPane.ERROR_MESSAGE);
 					}
-				}
 			}
 		}
-
 	}
 
 	/**
@@ -433,12 +422,12 @@ public class SwingExtendedController extends SwingController {
 		case EXTENDED:
 			back = SwingViewExtendedBuilder.ORANGE_BG;
 			fore = SwingViewExtendedBuilder.WHITE_BG;
-			switchText = "Finalizar";
+			switchText = messageBundle.getString("bgsignature.button.swap-l.label");
 			break;
 		case MAIN:
 			back = SwingViewExtendedBuilder.WHITE_BG;
 			fore = SwingViewExtendedBuilder.BLUE_BG;
-			switchText = "Devolver";
+			switchText = messageBundle.getString("bgsignature.button.swap-r.label");
 			break;
 		}
 

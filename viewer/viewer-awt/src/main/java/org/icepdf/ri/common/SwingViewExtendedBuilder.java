@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
+import org.icepdf.ri.common.views.RoundedCornerButtonUI;
 import org.icepdf.ri.images.Images;
 import org.icepdf.ri.util.PropertiesManager;
 
@@ -84,7 +85,7 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 	 * @return the j button
 	 */
 	public JButton buildSwapButton() {
-		JButton btn = makeBGButton("Finalizar", ORANGE_BG, WHITE_BG);
+		JButton btn = createBGButton(messageBundle.getString("bgsignature.button.swap-l.label"), ORANGE_BG, WHITE_BG);
 		if (viewerController != null && btn != null)
 			((SwingExtendedController) viewerController).setSwapButton(btn);
 		return btn;
@@ -96,7 +97,7 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 	 * @return the j button
 	 */
 	public JButton buildOkButton() {
-		JButton btn = makeBGButton("Verificar", ORANGE_BG, WHITE_BG);
+		JButton btn = createBGButton(messageBundle.getString("bgsignature.button.check.label"), ORANGE_BG, WHITE_BG);
 		if (viewerController != null && btn != null)
 			((SwingExtendedController) viewerController).setOkButton(btn);
 		return btn;
@@ -108,7 +109,7 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 	 * @return the j button
 	 */
 	public JButton buildResetButton() {
-		JButton btn = makeBGButton("Reiniciar", WHITE_BG, BLUE_BG);
+		JButton btn = createBGButton(messageBundle.getString("bgsignature.button.back.label"), WHITE_BG, BLUE_BG);
 		if (viewerController != null && btn != null)
 			((SwingExtendedController) viewerController).setResetButton(btn);
 		return btn;
@@ -337,7 +338,7 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 							PropertiesManager.PROPERTY_SHOW_UTILITY_OK)))
 			addToStatusBar(viewPanel, buildOkButton());
 
-		viewPanel.setLayout(new ToolbarLayout(ToolbarLayout.LEFT, 10, 10));
+		viewPanel.setLayout(new ToolbarLayout(ToolbarLayout.LEFT, 20, 10));
 		return viewPanel;
 	}
 	
@@ -349,14 +350,18 @@ public class SwingViewExtendedBuilder extends SwingViewBuilder {
 	 * @param frg the frg
 	 * @return the j button
 	 */
-	private JButton makeBGButton(String title, Color bck, Color frg) {
-		JButton btn = new JButton(title);
-		btn.setContentAreaFilled(false);
-		btn.setOpaque(true);
+	private JButton createBGButton(String title, Color bck, Color frg) {
+		JButton btn = new JButton(title){
+			private static final long serialVersionUID = -8335539569457463883L;
+			@Override public void updateUI() {
+	            setUI(new RoundedCornerButtonUI());
+	        }};
 		btn.setBackground(bck);
 		btn.setForeground(frg);
-		btn.setPreferredSize(new Dimension(140, 40));
-		btn.setFont(new Font("Arial", Font.BOLD, 14));
+		btn.setPreferredSize(new Dimension(160, 50));
+		btn.setFont(new Font("Opens Sans", Font.PLAIN, 20));
+		btn.setContentAreaFilled(false);
+
 		return btn;
 	}
     

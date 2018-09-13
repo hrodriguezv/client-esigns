@@ -4,22 +4,20 @@
 
 package org.icepdf.ri.common;
 
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JToggleButton;
 
 import org.icepdf.ri.common.utility.queue.ListenerMessageSender;
 import org.icepdf.ri.common.utility.queue.ListenerQueueConfig;
@@ -27,13 +25,14 @@ import org.icepdf.ri.common.views.DocumentViewController;
 import org.icepdf.ri.common.views.DocumentViewControllerExtendedImpl;
 import org.icepdf.ri.common.views.DocumentViewControllerImpl;
 import org.icepdf.ri.common.views.DocumentViewModelImpl;
-import org.icepdf.ri.images.Images;
 
 import com.consultec.esigns.core.io.FileSystemManager;
 import com.consultec.esigns.core.model.PayloadTO;
 import com.consultec.esigns.core.model.PayloadTO.Stage;
 import com.consultec.esigns.core.util.MQUtility;
+import com.consultec.esigns.core.util.PropertiesManager;
 import com.consultec.esigns.core.util.WMICUtil;
+import com.consultec.esigns.strokes.SignaturePadVendor;
 import com.consultec.esigns.strokes.api.IStrokeSignature;
 import com.consultec.esigns.strokes.io.FeatureNotImplemented;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,9 +44,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author hrodriguez
  */
 public class SwingExtendedController extends SwingController {
-
-	/** The sign button. */
-	private JToggleButton signButton;
 
 	/** The vendor. */
 	private IStrokeSignature vendor;
@@ -156,21 +152,34 @@ public class SwingExtendedController extends SwingController {
 	 */
 	private void setDefaultStrokeProvider() {
 
+		boolean forceLoadingProvider = Boolean.parseBoolean(
+			PropertiesManager.getInstance().getValue(
+				"forceload.stroke.provider.implementation"));
+
 		try {
-			List<String> devices = WMICUtil.getRawDevicesConnected();
+			Consumer<IStrokeSignature> consumer = null;
 			ServiceLoader<IStrokeSignature> loader =
 				ServiceLoader.load(IStrokeSignature.class);
-			loader.forEach(new Consumer<IStrokeSignature>() {
-
-				public void accept(IStrokeSignature arg0) {
-
+			if (forceLoadingProvider) {
+				consumer = arg0 -> {
+					if (arg0.getVendor().getVendorID().equals(
+						SignaturePadVendor.WACOM.getVendorID())) {
+						vendor = arg0;
+					}
+				};
+			}
+			else {
+				List<String> devices = WMICUtil.getRawDevicesConnected();
+				consumer = arg0 -> {
 					for (String device : devices) {
 						if (arg0.getVendor().getVendorID().equals(device)) {
 							vendor = arg0;
 						}
 					}
-				}
-			});
+				};
+			}
+
+			loader.forEach(consumer);
 
 			logger.info(
 				"Signature strokes vendorID found [" +
@@ -178,6 +187,7 @@ public class SwingExtendedController extends SwingController {
 
 			documentViewController =
 				new DocumentViewControllerExtendedImpl(this);
+
 			if (vendor != null) {
 				((DocumentViewControllerExtendedImpl) documentViewController).setSignatureVendor(
 					vendor);
@@ -195,19 +205,8 @@ public class SwingExtendedController extends SwingController {
 				viewer,
 				"No se ha detectado ning\u00fAn dispositivo de firma digital conectado, por lo tanto no puede realizar ninguna operaci\u00f3n sobre el documento",
 				"Informaci\u00f3n", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Sets the sign button.
-	 *
-	 * @param btn
-	 *            the new sign button
-	 */
-	public void setSignButton(JToggleButton btn) {
-
-		signButton = btn;
-		btn.addItemListener(this);
 	}
 
 	/**
@@ -255,13 +254,6 @@ public class SwingExtendedController extends SwingController {
 
 		boolean actualToolMayHaveChanged = false;
 
-		if (argToolName == DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION) {
-			actualToolMayHaveChanged = documentViewController.setToolMode(
-				DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION);
-			documentViewController.setViewCursor(
-				DocumentViewController.CURSOR_CROSSHAIR);
-			setCursorOnComponents(DocumentViewController.CURSOR_DEFAULT);
-		}
 		if (argToolName == DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION) {
 			actualToolMayHaveChanged = documentViewController.setToolMode(
 				DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION);
@@ -288,9 +280,9 @@ public class SwingExtendedController extends SwingController {
 	public void openDocument(String pathname) {
 
 		super.openDocument(pathname);
-		// added recently
 		setPageViewMode(DocumentViewControllerImpl.ONE_COLUMN_VIEW, false);
 		setPageFitMode(DocumentViewController.PAGE_FIT_WINDOW_WIDTH, false);
+		setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
 		showOnScreen(Screen.EXTENDED, viewer);
 	}
 
@@ -320,45 +312,8 @@ public class SwingExtendedController extends SwingController {
 
 		super.reflectToolInToolButtons();
 		reflectSelectionInButton(
-			signButton, documentViewController.isToolModeSelected(
-				DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION));
-		reflectSelectionInButton(
 			switchButton, documentViewController.isToolModeSelected(
 				DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * org.icepdf.ri.common.SwingController#itemStateChanged(java.awt.event.
-	 * ItemEvent)
-	 */
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-
-		super.itemStateChanged(e);
-		Object source = e.getSource();
-		if (source == null)
-			return;
-
-		int tool = getDocumentViewToolMode();
-		setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
-		try {
-			if (source == signButton) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					tool =
-						DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION;
-					setDocumentToolMode(
-						DocumentViewModelImpl.DISPLAY_TOOL_SIGNATURE_SELECTION);
-				}
-				else if (e.getStateChange() == ItemEvent.DESELECTED) {
-					tool = DocumentViewModelImpl.DISPLAY_TOOL_PAN;
-				}
-			}
-		}
-		finally {
-			setDisplayTool(tool);
-		}
 	}
 
 	/*
@@ -379,8 +334,8 @@ public class SwingExtendedController extends SwingController {
 		}
 		else if (source == resetButton) {
 			int dialogResult = JOptionPane.showConfirmDialog(
-				viewer, "Desea limpiar las firmas realizadas hasta el momento?",
-				"Pregunta", JOptionPane.YES_NO_OPTION);
+				viewer, messageBundle.getString("bgsignature.window.back.message"),
+				messageBundle.getString("bgsignature.window.back.title"), JOptionPane.YES_NO_OPTION);
 			if (dialogResult == JOptionPane.YES_OPTION) {
 				FileSystemManager.getInstance().getPdfStrokedDoc().delete();
 				this.openDocument(
@@ -392,15 +347,10 @@ public class SwingExtendedController extends SwingController {
 			if (!FileSystemManager.getInstance().getPdfStrokedDoc().exists()) {
 				JOptionPane.showMessageDialog(
 					viewer,
-					"Archivo PDF firmado con trazos, no existe. No se puede realizar el env\u00edo",
-					"Informaci\u00f3n", JOptionPane.ERROR_MESSAGE);
+					messageBundle.getString("bgsignature.window.errorstrokes.message"),
+					messageBundle.getString("bgsignature.window.errorstrokes.title"), JOptionPane.ERROR_MESSAGE);
 			}
 			else {
-				int dialogResult = JOptionPane.showConfirmDialog(
-					viewer,
-					"Acaba de realizar la revisi\u00f3n del documento. Desea enviar el contenido para revisi\u00f3n en el banco?",
-					"Pregunta", JOptionPane.YES_NO_OPTION);
-				if (dialogResult == JOptionPane.YES_OPTION) {
 					PayloadTO post = new PayloadTO();
 					post.setSessionID(
 						FileSystemManager.getInstance().getSessionId());
@@ -420,10 +370,6 @@ public class SwingExtendedController extends SwingController {
 						MQUtility.sendMessageMQ(
 							ListenerQueueConfig.class,
 							ListenerMessageSender.class, pckg);
-						JOptionPane.showMessageDialog(
-							viewer, "Archivo enviado satisfactoriamente",
-							"Informaci\u00f3n",
-							JOptionPane.INFORMATION_MESSAGE);
 						windowManagementCallback.disposeWindow(
 							this, viewer, propertiesManager.getPreferences());
 					}
@@ -435,13 +381,11 @@ public class SwingExtendedController extends SwingController {
 						e.printStackTrace();
 						JOptionPane.showMessageDialog(
 							viewer,
-							"Hubo un error al intentar enviar el paquete de datos. No se puede realizar el env\u00edo",
-							"Informaci\u00f3n", JOptionPane.ERROR_MESSAGE);
+							messageBundle.getString("bgsignature.window.error.message"),
+							messageBundle.getString("bgsignature.window.error.title"), JOptionPane.ERROR_MESSAGE);
 					}
-				}
 			}
 		}
-
 	}
 
 	/**
@@ -455,6 +399,8 @@ public class SwingExtendedController extends SwingController {
 		Frame viewer = this.getViewerFrame();
 		int screen = this.getCurrentScreen();
 		Screen screenEnum = Screen.getAlternateScreen(screen);
+		if (screenEnum.equals(Screen.MAIN)) setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN);
+		else setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
 		this.showOnScreen(screenEnum, viewer);
 		return screenEnum;
 	}
@@ -466,35 +412,40 @@ public class SwingExtendedController extends SwingController {
 	 *            the screen enum
 	 */
 	private void applySettingsOnButtons(Screen screenEnum) {
-
-		String switchImageName =
-			(screenEnum.equals(Screen.EXTENDED) ? "swapd" : "swapi");
-		String imageSize = "_32";
-
-		boolean isExtended = !screenEnum.equals(Screen.MAIN);
+		Color back = null;
+		Color fore = null;
+		String switchText = null;
 		boolean isMain = !screenEnum.equals(Screen.EXTENDED);
 		boolean isVendorFound = vendor != null;
 
-		switchButton.setIcon(
-			new ImageIcon(
-				Images.get(switchImageName + "_a" + imageSize + ".png")));
-		switchButton.setPressedIcon(
-			new ImageIcon(
-				Images.get(switchImageName + "_i" + imageSize + ".png")));
-		switchButton.setRolloverIcon(
-			new ImageIcon(
-				Images.get(switchImageName + "_r" + imageSize + ".png")));
-		switchButton.setDisabledIcon(
-			new ImageIcon(
-				Images.get(switchImageName + "_i" + imageSize + ".png")));
+		switch (screenEnum){
+		case EXTENDED:
+			back = SwingViewExtendedBuilder.ORANGE_BG;
+			fore = SwingViewExtendedBuilder.WHITE_BG;
+			switchText = messageBundle.getString("bgsignature.button.swap-l.label");
+			break;
+		case MAIN:
+			back = SwingViewExtendedBuilder.WHITE_BG;
+			fore = SwingViewExtendedBuilder.BLUE_BG;
+			switchText = messageBundle.getString("bgsignature.button.swap-r.label");
+			break;
+		}
 
-		okButton.setVisible(isMain);
-		resetButton.setVisible(isMain);
-		signButton.setVisible(isExtended);
+		if (switchButton!=null) {
+			switchButton.setText(switchText);
+			switchButton.setBackground(back);
+			switchButton.setForeground(fore);
+		}
 
-		okButton.setEnabled(isVendorFound);
-		resetButton.setEnabled(isVendorFound);
-		signButton.setEnabled(isVendorFound);
+		if (okButton != null) {
+			okButton.setVisible(isMain);
+			okButton.setEnabled(isVendorFound);
+		}
+
+		if (resetButton != null) {
+			resetButton.setVisible(isMain);
+			resetButton.setEnabled(isVendorFound);
+		}
 	}
 
 	/**

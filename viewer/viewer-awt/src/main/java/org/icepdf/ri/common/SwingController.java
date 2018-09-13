@@ -2383,7 +2383,7 @@ public class SwingController extends ComponentAdapter
             openDocument(file.getPath());
         } else if (windowManagementCallback != null) {
             int oldTool = SwingController.this.getDocumentViewToolMode();
-            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
             try {
                 windowManagementCallback.newWindow(file.getPath());
             } finally {
@@ -2506,7 +2506,7 @@ public class SwingController extends ComponentAdapter
                     closeDocument();
                 }
 
-                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
                 addRecentFileEntry(Paths.get(pathname));
 
@@ -2598,7 +2598,7 @@ public class SwingController extends ComponentAdapter
             openDocument(url);
         } else if (windowManagementCallback != null) {
             int oldTool = SwingController.this.getDocumentViewToolMode();
-            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
             try {
                 windowManagementCallback.newWindow(url);
             } finally {
@@ -2619,7 +2619,7 @@ public class SwingController extends ComponentAdapter
                 closeDocument();
             }
 
-            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
             // load the document
             document = new Document();
@@ -2749,7 +2749,7 @@ public class SwingController extends ComponentAdapter
                     closeDocument();
                 }
 
-                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
                 // load the document
                 document = new Document();
@@ -2808,7 +2808,7 @@ public class SwingController extends ComponentAdapter
                     closeDocument();
                 }
 
-                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
                 // load the document
                 document = embeddedDocument;
@@ -2851,7 +2851,7 @@ public class SwingController extends ComponentAdapter
                     closeDocument();
                 }
 
-                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
                 // load the document
                 document = new Document();
@@ -4056,7 +4056,7 @@ public class SwingController extends ComponentAdapter
 
             // set hour glass
             outlinesTree.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
             // capture the action if no destination is found and point to the
             // actions destination information
@@ -4226,7 +4226,7 @@ public class SwingController extends ComponentAdapter
             return;
         int oldTool = getDocumentViewToolMode();
         try {
-            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//            setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
             reflectPageChangeInComponents();
 
@@ -4793,7 +4793,7 @@ public class SwingController extends ComponentAdapter
                 int documentIcon = getDocumentViewToolMode();
                 try {
                     // set cursor for document view
-                    setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//                    setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
                     if (source == propertiesMenuItem) {
                         Runnable doSwingWork = this::showDocumentProperties;
@@ -4968,7 +4968,7 @@ public class SwingController extends ComponentAdapter
 
         boolean doSetFocus = false;
         int tool = getDocumentViewToolMode();
-        setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//        setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
         try {
             if (source == zoomComboBox) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -5422,7 +5422,7 @@ public class SwingController extends ComponentAdapter
             int documentIcon = getDocumentViewToolMode();
             try {
                 // set cursor for document view
-                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
+//                setDisplayTool(DocumentViewModelImpl.DISPLAY_TOOL_WAIT);
 
                 if (c == KeyEventConstants.KEY_CODE_SAVE_AS &&
                         m == KeyEventConstants.MODIFIER_SAVE_AS) {

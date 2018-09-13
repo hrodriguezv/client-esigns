@@ -7,7 +7,6 @@ import org.icepdf.ri.common.SwingController;
 
 import com.consultec.esigns.strokes.api.IStrokeSignature;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class DocumentViewControllerExtendedImpl.
  *
@@ -17,6 +16,9 @@ public class DocumentViewControllerExtendedImpl extends DocumentViewControllerIm
 
 	/** The signature vendor. */
 	private IStrokeSignature signatureVendor;
+	
+	/** The page view component. */
+	private AbstractPageViewComponent pageViewComponent;
 	
 	/**
 	 * Instantiates a new document view controller extended impl.
@@ -43,6 +45,25 @@ public class DocumentViewControllerExtendedImpl extends DocumentViewControllerIm
 	 */
 	public void setSignatureVendor(IStrokeSignature signatureVendor) {
 		this.signatureVendor = signatureVendor;
+	}
+
+	/**
+	 * Sets the page view component.
+	 *
+	 * @param pageView the new page view component
+	 */
+	public void setPageViewComponent(
+		AbstractPageViewComponent pageView) {
+		this.pageViewComponent = pageView;
+	}
+
+	/**
+	 * Gets the page view component.
+	 *
+	 * @return the page view component
+	 */
+	public AbstractPageViewComponent getPageViewComponent() {
+		return pageViewComponent;
 	}
 
 	

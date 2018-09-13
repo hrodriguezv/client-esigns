@@ -3,7 +3,6 @@ package org.icepdf.ri.common.utility.queue;
 import javax.jms.ConnectionFactory;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.icepdf.ri.util.PropertiesManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -13,6 +12,7 @@ import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 
 import com.consultec.esigns.core.queue.IQueueConfig;
+import com.consultec.esigns.core.util.PropertiesManager;
 
 /**
  * The Class QueueConfig.

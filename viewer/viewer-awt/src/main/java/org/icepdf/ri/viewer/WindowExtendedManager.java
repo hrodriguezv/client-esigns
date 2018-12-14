@@ -1,6 +1,7 @@
 /**
  * 
  */
+
 package org.icepdf.ri.viewer;
 
 import static org.icepdf.ri.util.PropertiesManager.PROPERTY_DEFAULT_VIEW_TYPE;
@@ -34,9 +35,8 @@ import com.consultec.esigns.core.io.FileSystemManager;
  */
 public class WindowExtendedManager extends WindowManager {
 
-    protected static final Logger logger =
-            Logger.getLogger(WindowExtendedManager.class.toString());
-
+	protected static final Logger logger =
+		Logger.getLogger(WindowExtendedManager.class.toString());
 
 	/** The window manager. */
 	private static WindowExtendedManager windowManager;
@@ -44,56 +44,72 @@ public class WindowExtendedManager extends WindowManager {
 	/**
 	 * Creates the instance.
 	 *
-	 * @param properties the properties
-	 * @param messageBundle the message bundle
+	 * @param properties
+	 *            the properties
+	 * @param messageBundle
+	 *            the message bundle
 	 * @return the window manager
 	 */
-	public static WindowManager createInstance(PropertiesManager properties, ResourceBundle messageBundle) {
+	public static WindowManager createInstance(
+		PropertiesManager properties, ResourceBundle messageBundle) {
+
 		return createInstance(properties, messageBundle, null);
 	}
-	
+
 	/**
 	 * Creates the instance.
 	 *
-	 * @param properties the properties
-	 * @param messageBundle the message bundle
-	 * @param id the id
+	 * @param properties
+	 *            the properties
+	 * @param messageBundle
+	 *            the message bundle
+	 * @param id
+	 *            the id
 	 * @return the window manager
 	 */
-	public static WindowManager createInstance(PropertiesManager properties, ResourceBundle messageBundle, String id) {
+	public static WindowManager createInstance(
+		PropertiesManager properties, ResourceBundle messageBundle, String id) {
 
 		windowManager = new WindowExtendedManager();
 		windowManager.properties = properties;
 		windowManager.controllers = new ArrayList<>();
 		try {
 			FileSystemManager.getInstance().init(id);
-		} catch (FileNotFoundException e) {
-			logger.log(Level.FINE, "Error checking file system: " + e.getMessage(), e);
-			org.icepdf.ri.util.Resources.showMessageDialog(null, JOptionPane.INFORMATION_MESSAGE, messageBundle,
-					"viewer.dialog.error.exception.title", "viewer.dialog.error.exception.msg",
-					"[Error de inconsistencia en el sistema de archivos. Por favor, contacte a su admininstrador]");
+		}
+		catch (FileNotFoundException e) {
+			logger.log(
+				Level.FINE, "Error checking file system: " + e.getMessage(), e);
+			org.icepdf.ri.util.Resources.showMessageDialog(
+				null, JOptionPane.INFORMATION_MESSAGE, messageBundle,
+				"viewer.dialog.error.exception.title",
+				"viewer.dialog.error.exception.msg",
+				"[Error de inconsistencia en el sistema de archivos. Por favor, contacte a su admininstrador]");
 			e.printStackTrace();
 			System.exit(1);
 		}
 
 		if (messageBundle != null) {
 			windowManager.messageBundle = messageBundle;
-		} else {
-			windowManager.messageBundle = ResourceBundle.getBundle(PropertiesManager.DEFAULT_MESSAGE_BUNDLE);
+		}
+		else {
+			windowManager.messageBundle = ResourceBundle.getBundle(
+				PropertiesManager.DEFAULT_MESSAGE_BUNDLE);
 		}
 		return windowManager;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.icepdf.ri.viewer.WindowManager#commonWindowCreation()
 	 */
 	protected Controller commonWindowCreation() {
+
 		Controller controller = new SwingExtendedController(messageBundle);
 		controller.setWindowManagementCallback(this);
 
 		// add interactive mouse link annotation support
-		controller.getDocumentViewController()
-				.setAnnotationCallback(new MyAnnotationCallback(controller.getDocumentViewController()));
+		controller.getDocumentViewController().setAnnotationCallback(
+			new MyAnnotationCallback(controller.getDocumentViewController()));
 
 		controllers.add(controller);
 		// guild a new swing viewer with remembered view settings.
@@ -102,16 +118,21 @@ public class WindowExtendedManager extends WindowManager {
 		float pageRotation = 0;
 		Preferences viewerPreferences = getProperties().getPreferences();
 		try {
-			viewType = viewerPreferences.getInt(PROPERTY_DEFAULT_VIEW_TYPE, DocumentViewControllerImpl.ONE_PAGE_VIEW);
-			pageFit = viewerPreferences.getInt(PropertiesManager.PROPERTY_DEFAULT_PAGEFIT,
-					DocumentViewController.PAGE_FIT_WINDOW_WIDTH);
-			pageRotation = viewerPreferences.getFloat(PropertiesManager.PROPERTY_DEFAULT_ROTATION, pageRotation);
-		} catch (NumberFormatException e) {
+			viewType = viewerPreferences.getInt(
+				PROPERTY_DEFAULT_VIEW_TYPE,
+				DocumentViewControllerImpl.ONE_PAGE_VIEW);
+			pageFit = viewerPreferences.getInt(
+				PropertiesManager.PROPERTY_DEFAULT_PAGEFIT,
+				DocumentViewController.PAGE_FIT_WINDOW_WIDTH);
+			pageRotation = viewerPreferences.getFloat(
+				PropertiesManager.PROPERTY_DEFAULT_ROTATION, pageRotation);
+		}
+		catch (NumberFormatException e) {
 			// eating error, as we can continue with out alarm
 		}
 
-		SwingViewBuilder factory = new SwingViewExtendedBuilder((SwingController) controller, viewType, pageFit,
-				pageRotation);
+		SwingViewBuilder factory = new SwingViewExtendedBuilder(
+			(SwingController) controller, viewType, pageFit, pageRotation);
 
 		JFrame frame = factory.buildViewerFrame();
 		if (frame != null) {
@@ -121,4 +142,13 @@ public class WindowExtendedManager extends WindowManager {
 
 		return controller;
 	}
+
+	@Override
+	public void disposeWindow(
+		Controller controller, JFrame viewer, Preferences preferences) {
+		Boolean doIt = ((SwingExtendedController)controller).isDeleteOnExit();
+		FileSystemManager.getInstance().deleteOnExit(doIt);
+		super.disposeWindow(controller, viewer, preferences);
+	}
+
 }

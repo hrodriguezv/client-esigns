@@ -81,7 +81,8 @@ public class PanningExtendedHandler extends CommonToolHandler
 		}
         MessageFormat formatter = new MessageFormat(SIGNATURE_REASON);
 		String reason = formatter.format(new Object[]{user!=null?user:""});
-		this.signProvider.setParameters("Ciudad de Panamá, Panamá", reason, null);
+		this.signProvider.setParameters(PropertiesManager.getInstance().getValue(
+			PropertiesManager.PROPERTY_USER_STROKE_LOCATION), reason, null);
 	}
 
 	/** KeyEvents can queue up, if the user holds down a key, causing us to do several page changes, unless we use flagging to ignore the extraneous KeyEvents. */

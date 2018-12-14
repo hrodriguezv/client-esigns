@@ -27,13 +27,14 @@ import org.icepdf.ri.common.views.DocumentViewControllerImpl;
 import org.icepdf.ri.common.views.DocumentViewModelImpl;
 
 import com.consultec.esigns.core.io.FileSystemManager;
-import com.consultec.esigns.core.model.PayloadTO;
-import com.consultec.esigns.core.model.PayloadTO.Stage;
+import com.consultec.esigns.core.transfer.PayloadTO;
+import com.consultec.esigns.core.transfer.PayloadTO.Stage;
 import com.consultec.esigns.core.util.MQUtility;
 import com.consultec.esigns.core.util.PropertiesManager;
 import com.consultec.esigns.core.util.WMICUtil;
 import com.consultec.esigns.strokes.SignaturePadVendor;
 import com.consultec.esigns.strokes.api.IStrokeSignature;
+import com.consultec.esigns.strokes.api.IStrokeSignatureLicensed;
 import com.consultec.esigns.strokes.io.FeatureNotImplemented;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,6 +60,8 @@ public class SwingExtendedController extends SwingController {
 
 	/** The current screen. */
 	private int currentScreen;
+	
+	private Boolean deleteOnExit = Boolean.TRUE;
 
 	/**
 	 * The Enum Screen.
@@ -165,6 +168,9 @@ public class SwingExtendedController extends SwingController {
 					if (arg0.getVendor().getVendorID().equals(
 						SignaturePadVendor.WACOM.getVendorID())) {
 						vendor = arg0;
+						((IStrokeSignatureLicensed) vendor).setLicense(
+							PropertiesManager.getInstance().getValue(
+								"stroke.provider.wacom.license"));
 					}
 				};
 			}
@@ -201,11 +207,11 @@ public class SwingExtendedController extends SwingController {
 				Level.FINE,
 				"Error loading IStrokeSignature services: " + e.getMessage(),
 				e);
-			JOptionPane.showMessageDialog(
-				viewer,
-				"No se ha detectado ning\u00fAn dispositivo de firma digital conectado, por lo tanto no puede realizar ninguna operaci\u00f3n sobre el documento",
-				"Informaci\u00f3n", JOptionPane.ERROR_MESSAGE);
+			org.icepdf.ri.util.Resources.showMessageDialog(null, JOptionPane.INFORMATION_MESSAGE, messageBundle,
+				"viewer.dialog.error.exception.title", "viewer.dialog.error.exception.msg",
+				"[No se ha detectado ningún dispositivo de firma digital conectado, por lo tanto no puede realizar ninguna operación sobre el documento]");
 			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 
@@ -334,8 +340,10 @@ public class SwingExtendedController extends SwingController {
 		}
 		else if (source == resetButton) {
 			int dialogResult = JOptionPane.showConfirmDialog(
-				viewer, messageBundle.getString("bgsignature.window.back.message"),
-				messageBundle.getString("bgsignature.window.back.title"), JOptionPane.YES_NO_OPTION);
+				viewer,
+				messageBundle.getString("bgsignature.window.back.message"),
+				messageBundle.getString("bgsignature.window.back.title"),
+				JOptionPane.YES_NO_OPTION);
 			if (dialogResult == JOptionPane.YES_OPTION) {
 				FileSystemManager.getInstance().getPdfStrokedDoc().delete();
 				this.openDocument(
@@ -347,43 +355,50 @@ public class SwingExtendedController extends SwingController {
 			if (!FileSystemManager.getInstance().getPdfStrokedDoc().exists()) {
 				JOptionPane.showMessageDialog(
 					viewer,
-					messageBundle.getString("bgsignature.window.errorstrokes.message"),
-					messageBundle.getString("bgsignature.window.errorstrokes.title"), JOptionPane.ERROR_MESSAGE);
+					messageBundle.getString(
+						"bgsignature.window.errorstrokes.message"),
+					messageBundle.getString(
+						"bgsignature.window.errorstrokes.title"),
+					JOptionPane.ERROR_MESSAGE);
 			}
 			else {
-					PayloadTO post = new PayloadTO();
-					post.setSessionID(
-						FileSystemManager.getInstance().getSessionId());
-					post.setStage(Stage.MANUAL_SIGNED);
-					ObjectMapper objectMapper = new ObjectMapper();
-					String pckg = null;
-					try {
-						pckg = objectMapper.writeValueAsString(post);
-					}
-					catch (JsonProcessingException e) {
-						logger.log(
-							Level.WARNING,
-							"There was an error trying to parse PayloadTO", e);
-						e.printStackTrace();
-					}
-					try {
-						MQUtility.sendMessageMQ(
-							ListenerQueueConfig.class,
-							ListenerMessageSender.class, pckg);
-						windowManagementCallback.disposeWindow(
-							this, viewer, propertiesManager.getPreferences());
-					}
-					catch (Exception e) {
-						logger.log(
-							Level.WARNING,
-							"There was an error trying to connect with the local server to send package",
-							e);
-						e.printStackTrace();
-						JOptionPane.showMessageDialog(
-							viewer,
-							messageBundle.getString("bgsignature.window.error.message"),
-							messageBundle.getString("bgsignature.window.error.title"), JOptionPane.ERROR_MESSAGE);
-					}
+				PayloadTO post = new PayloadTO();
+				post.setSessionID(
+					FileSystemManager.getInstance().getSessionId());
+				post.setStage(Stage.MANUAL_SIGNED);
+				ObjectMapper objectMapper = new ObjectMapper();
+				String pckg = null;
+				try {
+					pckg = objectMapper.writeValueAsString(post);
+				}
+				catch (JsonProcessingException e) {
+					logger.log(
+						Level.WARNING,
+						"There was an error trying to parse PayloadTO", e);
+					e.printStackTrace();
+				}
+				try {
+					MQUtility.sendMessageMQ(
+						ListenerQueueConfig.class, ListenerMessageSender.class,
+						pckg);
+					this.deleteOnExit = Boolean.FALSE;
+					windowManagementCallback.disposeWindow(
+						this, viewer, propertiesManager.getPreferences());
+				}
+				catch (Exception e) {
+					logger.log(
+						Level.WARNING,
+						"There was an error trying to connect with the local server to send package",
+						e);
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(
+						viewer,
+						messageBundle.getString(
+							"bgsignature.window.error.message"),
+						messageBundle.getString(
+							"bgsignature.window.error.title"),
+						JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 	}
@@ -399,8 +414,11 @@ public class SwingExtendedController extends SwingController {
 		Frame viewer = this.getViewerFrame();
 		int screen = this.getCurrentScreen();
 		Screen screenEnum = Screen.getAlternateScreen(screen);
-		if (screenEnum.equals(Screen.MAIN)) setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN);
-		else setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
+		if (screenEnum.equals(Screen.MAIN))
+			setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN);
+		else
+			setDocumentToolMode(
+				DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
 		this.showOnScreen(screenEnum, viewer);
 		return screenEnum;
 	}
@@ -412,26 +430,29 @@ public class SwingExtendedController extends SwingController {
 	 *            the screen enum
 	 */
 	private void applySettingsOnButtons(Screen screenEnum) {
+
 		Color back = null;
 		Color fore = null;
 		String switchText = null;
 		boolean isMain = !screenEnum.equals(Screen.EXTENDED);
 		boolean isVendorFound = vendor != null;
 
-		switch (screenEnum){
+		switch (screenEnum) {
 		case EXTENDED:
 			back = SwingViewExtendedBuilder.ORANGE_BG;
 			fore = SwingViewExtendedBuilder.WHITE_BG;
-			switchText = messageBundle.getString("bgsignature.button.swap-l.label");
+			switchText =
+				messageBundle.getString("bgsignature.button.swap-l.label");
 			break;
 		case MAIN:
 			back = SwingViewExtendedBuilder.WHITE_BG;
 			fore = SwingViewExtendedBuilder.BLUE_BG;
-			switchText = messageBundle.getString("bgsignature.button.swap-r.label");
+			switchText =
+				messageBundle.getString("bgsignature.button.swap-r.label");
 			break;
 		}
 
-		if (switchButton!=null) {
+		if (switchButton != null) {
 			switchButton.setText(switchText);
 			switchButton.setBackground(back);
 			switchButton.setForeground(fore);
@@ -456,5 +477,12 @@ public class SwingExtendedController extends SwingController {
 	public int getCurrentScreen() {
 
 		return currentScreen;
+	}
+	/**
+	 * 
+	 * @return
+	 */
+	public Boolean isDeleteOnExit() {
+		return deleteOnExit;
 	}
 }

@@ -7,6 +7,7 @@ package org.icepdf.ri.viewer;
 import static org.icepdf.ri.util.PropertiesManager.PROPERTY_DEFAULT_VIEW_TYPE;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -147,7 +148,12 @@ public class WindowExtendedManager extends WindowManager {
 	public void disposeWindow(
 		Controller controller, JFrame viewer, Preferences preferences) {
 		Boolean doIt = ((SwingExtendedController)controller).isDeleteOnExit();
-		FileSystemManager.getInstance().deleteOnExit(doIt);
+		try {
+			FileSystemManager.getInstance().deleteOnExit(doIt);
+		}
+		catch (IOException e) {
+			logger.severe("Error deleting files in configured workspace");
+		}
 		super.disposeWindow(controller, viewer, preferences);
 	}
 

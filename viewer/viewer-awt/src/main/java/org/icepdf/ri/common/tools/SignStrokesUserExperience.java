@@ -159,7 +159,7 @@ public class SignStrokesUserExperience extends CommonToolHandler {
 		x = (int) coordinates.getX();
 		y = (int) coordinates.getY();
 
-		AffineTransform at = AffineTransform.getTranslateInstance(x, y - 65);
+        AffineTransform at = AffineTransform.getTranslateInstance(x - 85, y - 65);
 		at.concatenate(AffineTransform.getScaleInstance(200, 130));
 		PdfCanvas canvas = new PdfCanvas(pdfDoc.getPage(currentPage));
 		double[] matrix = new double[6];

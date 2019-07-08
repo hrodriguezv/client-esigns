@@ -111,6 +111,7 @@ dependencies {
     compile 'org.apache.pdfbox:jbig2-imageio:' + "${JBIG2_VERSION}"
     compile 'org.springframework:spring-aop:5.0.7.RELEASE'
     compile 'com.itextpdf:itext7-core:7.0.4'
+    compile 'commons-io:commons-io:2.1'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
     compile 'org.apache.activemq:activemq-all:5.15.0'
 	compile 'net.java.dev.jna:jna-platform:4.5.2'

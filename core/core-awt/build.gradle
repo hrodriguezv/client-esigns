@@ -119,6 +119,6 @@ dependencies {
     compile files('libs/com.consultec.esigns.strokes.api-1.0-SNAPSHOT.jar')
     //added Wacom implementation API and drivers	
     compile files('libs/com.consultec.esigns.strokes.impl.wacom-1.0-SNAPSHOT.jar')
-    compile files('libs/flsx.jar')
-    compile files('libs/wgssLicenceJNI.jar')
+    compile files('libs/flsx-1.0.jar')
+    compile files('libs/wgssLicenceJNI-1.0.jar')
 }

@@ -153,8 +153,16 @@ public class WindowExtendedManager extends WindowManager {
         ObjectMapper objectMapper = new ObjectMapper();
         String pckg = objectMapper.writeValueAsString(post);
         MQUtility.sendMessageMQ(ListenerQueueConfig.class, ListenerMessageSender.class, pckg);
-
       }
+
+    } catch (Exception e) {
+
+      logger.severe("Error sending status to Stella");
+
+    }
+
+
+    try {
 
       FileSystemManager.getInstance().deleteOnExit(doIt);
 
@@ -163,6 +171,8 @@ public class WindowExtendedManager extends WindowManager {
       logger.severe("Error deleting files in configured workspace");
 
     }
+
+
 
     super.disposeWindow(controller, viewer, preferences);
   }

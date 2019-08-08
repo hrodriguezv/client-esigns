@@ -4,7 +4,6 @@
 
 package org.icepdf.ri.common;
 
-import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -18,6 +17,7 @@ import java.util.logging.Level;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import org.icepdf.ri.common.utility.queue.ListenerMessageSender;
 import org.icepdf.ri.common.utility.queue.ListenerQueueConfig;
@@ -46,443 +46,550 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class SwingExtendedController extends SwingController {
 
-	/** The vendor. */
-	private IStrokeSignature vendor;
+  /**
+   * The vendor.
+   */
+  private IStrokeSignature vendor;
 
-	/** The swap button. */
-	private JButton switchButton;
+  /**
+   * The swap button.
+   */
+  private JButton finishButton;
 
-	/** The swap button. */
-	private JButton okButton;
+  /**
+   * The cancel button.
+   */
+  private JButton cancelButton;
 
-	/** The reset button. */
-	private JButton resetButton;
+  /**
+   * The OK button.
+   */
+  private JButton okButton;
 
-	/** The current screen. */
-	private int currentScreen;
-	
-	private Boolean deleteOnExit = Boolean.TRUE;
+  /**
+   * The reset button.
+   */
+  private JButton resetButton;
 
-	/**
-	 * The Enum Screen.
-	 */
-	public enum Screen {
+  /**
+   * The panel visible in main window.
+   */
+  private JPanel mainWindowPanel;
 
-			/** The main. */
-			MAIN,
-			/** The extended. */
-			EXTENDED;
+  /**
+   * The panel visible in extended window.
+   */
+  private JPanel extendedWindowPanel;
 
-		/**
-		 * Gets the screen.
-		 *
-		 * @param k
-		 *            the k
-		 * @return the screen
-		 */
-		public static Screen getScreen(int k) {
+  /**
+   * The current screen.
+   */
+  private int currentScreen;
 
-			if (k == 0)
-				return MAIN;
-			else
-				return EXTENDED;
-		}
+  /**
+   * Delete file on app shutdown.
+   */
+  private Boolean deleteOnExit = Boolean.TRUE;
 
-		/**
-		 * Gets the alternate screen.
-		 *
-		 * @param k
-		 *            the k
-		 * @return the alternate screen
-		 */
-		public static Screen getAlternateScreen(int k) {
+  /**
+   * The Enum Screen.
+   */
+  public enum Screen {
 
-			if (k == 0)
-				return EXTENDED;
-			else
-				return MAIN;
-		}
-	}
+    /** The main. */
+    MAIN,
+    /** The extended. */
+    EXTENDED;
 
-	/**
-	 * Instantiates a new swing extended controller.
-	 *
-	 * @param currentMessageBundle
-	 *            the current message bundle
-	 */
-	public SwingExtendedController(ResourceBundle currentMessageBundle) {
+    /**
+     * Gets the screen.
+     *
+     * @param k the k
+     * @return the screen
+     */
+    public static Screen getScreen(int k) {
 
-		super(currentMessageBundle);
-		setDefaultStrokeProvider();
-	}
+      if (k == 0) {
 
-	/**
-	 * Show on screen.
-	 *
-	 * @param screenEnum
-	 *            the screen enum
-	 * @param frame
-	 *            the frame
-	 */
-	public void showOnScreen(Screen screenEnum, Frame frame) {
+        return MAIN;
 
-		GraphicsEnvironment ge =
-			GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice[] gd = ge.getScreenDevices();
-		int screen = screenEnum.ordinal();
-		if (screen > -1 && screen < gd.length) {
-			frame.setLocation(
-				gd[screen].getDefaultConfiguration().getBounds().x,
-				gd[screen].getDefaultConfiguration().getBounds().y +
-					frame.getY());
-		}
-		else if (gd.length > 0) {
-			frame.setLocation(
-				gd[0].getDefaultConfiguration().getBounds().x,
-				gd[0].getDefaultConfiguration().getBounds().y + frame.getY());
-		}
-		else {
-			throw new RuntimeException("No Screens Found");
-		}
-		this.currentScreen = screen;
-		applySettingsOnButtons(screenEnum);
-		frame.setExtendedState(
-			frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-	}
+      }
 
-	/**
-	 * Sets the default stroke vendor.
-	 */
-	private void setDefaultStrokeProvider() {
+      return EXTENDED;
 
-		boolean forceLoadingProvider = Boolean.parseBoolean(
-			PropertiesManager.getInstance().getValue(
-				"forceload.stroke.provider.implementation"));
+    }
 
-		try {
-			Consumer<IStrokeSignature> consumer = null;
-			ServiceLoader<IStrokeSignature> loader =
-				ServiceLoader.load(IStrokeSignature.class);
-			if (forceLoadingProvider) {
-				consumer = arg0 -> {
-					if (arg0.getVendor().getVendorID().equals(
-						SignaturePadVendor.WACOM.getVendorID())) {
-						vendor = arg0;
-						((IStrokeSignatureLicensed) vendor).setLicense(
-							PropertiesManager.getInstance().getValue(
-								"stroke.provider.wacom.license"));
-					}
-				};
-			}
-			else {
-				List<String> devices = WMICUtil.getRawDevicesConnected();
-				consumer = arg0 -> {
-					for (String device : devices) {
-						if (arg0.getVendor().getVendorID().equals(device)) {
-							vendor = arg0;
-						}
-					}
-				};
-			}
+    /**
+     * Gets the alternate screen.
+     *
+     * @param k the k
+     * @return the alternate screen
+     */
+    public static Screen getAlternateScreen(int k) {
 
-			loader.forEach(consumer);
+      if (k == 0) {
+        return EXTENDED;
+      }
 
-			logger.info(
-				"Signature strokes vendorID found [" +
-					((vendor != null) ? vendor.getVendor() : "") + "]");
+      return MAIN;
 
-			documentViewController =
-				new DocumentViewControllerExtendedImpl(this);
+    }
 
-			if (vendor != null) {
-				((DocumentViewControllerExtendedImpl) documentViewController).setSignatureVendor(
-					vendor);
-			}
-			else
-				throw new FeatureNotImplemented(
-					"No signature strokes vendor-implementation was found");
-		}
-		catch (Throwable e) {
-			logger.log(
-				Level.FINE,
-				"Error loading IStrokeSignature services: " + e.getMessage(),
-				e);
-			org.icepdf.ri.util.Resources.showMessageDialog(null, JOptionPane.INFORMATION_MESSAGE, messageBundle,
-				"viewer.dialog.error.exception.title", "viewer.dialog.error.exception.msg",
-				"[No se ha detectado ningún dispositivo de firma digital conectado, por lo tanto no puede realizar ninguna operación sobre el documento]");
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
+  }
 
-	/**
-	 * Sets the sign button.
-	 *
-	 * @param btn
-	 *            the new sign button
-	 */
-	public void setSwapButton(JButton btn) {
+  /**
+   * Instantiates a new swing extended controller.
+   *
+   * @param currentMessageBundle the current message bundle
+   */
+  public SwingExtendedController(ResourceBundle currentMessageBundle) {
 
-		switchButton = btn;
-		btn.addActionListener(this);
-	}
+    super(currentMessageBundle);
 
-	/**
-	 * Sets the OK button.
-	 *
-	 * @param btn
-	 *            the new sign button
-	 */
-	public void setOkButton(JButton btn) {
+    setDefaultStrokeProvider();
 
-		okButton = btn;
-		btn.addActionListener(this);
-	}
+  }
 
-	/**
-	 * Sets the reset button.
-	 *
-	 * @param btn
-	 *            the new reset button
-	 */
-	public void setResetButton(JButton btn) {
+  /**
+   * Show on screen.
+   *
+   * @param screenEnum the screen enum
+   * @param frame the frame
+   */
+  public void showOnScreen(Screen screenEnum, Frame frame) {
 
-		resetButton = btn;
-		btn.addActionListener(this);
-	}
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gd = ge.getScreenDevices();
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.icepdf.ri.common.SwingController#setDisplayTool(int)
-	 */
-	@Override
-	public void setDisplayTool(int argToolName) {
+    int screen = screenEnum.ordinal();
 
-		boolean actualToolMayHaveChanged = false;
+    if (screen > -1 && screen < gd.length) {
 
-		if (argToolName == DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION) {
-			actualToolMayHaveChanged = documentViewController.setToolMode(
-				DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION);
-			documentViewController.setViewCursor(
-				DocumentViewController.CURSOR_HAND_OPEN);
-			setCursorOnComponents(DocumentViewController.CURSOR_DEFAULT);
-		}
-		else {
-			super.setDisplayTool(argToolName);
-		}
+      frame.setLocation(gd[screen].getDefaultConfiguration().getBounds().x,
+        gd[screen].getDefaultConfiguration().getBounds().y + frame.getY());
 
-		if (actualToolMayHaveChanged) {
-			reflectToolInToolButtons();
-		}
-		// repaint the page views.
-		documentViewController.getViewContainer().repaint();
-	}
+    } else if (gd.length > 0) {
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.icepdf.ri.common.SwingController#openDocument(java.lang.String)
-	 */
-	@Override
-	public void openDocument(String pathname) {
+      frame.setLocation(gd[0].getDefaultConfiguration().getBounds().x,
+        gd[0].getDefaultConfiguration().getBounds().y + frame.getY());
 
-		super.openDocument(pathname);
-		setPageViewMode(DocumentViewControllerImpl.ONE_COLUMN_VIEW, false);
-		setPageFitMode(DocumentViewController.PAGE_FIT_WINDOW_WIDTH, false);
-		setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
-		showOnScreen(Screen.EXTENDED, viewer);
-	}
+    } else {
 
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * org.icepdf.ri.common.SwingController#commonNewDocumentHandling(java.lang.
-	 * String)
-	 */
-	@Override
-	public void commonNewDocumentHandling(String fileDescription) {
+      throw new RuntimeException("No Screens Found");
 
-		super.commonNewDocumentHandling(fileDescription);
-		// remove the file name from title bar
-		if (viewer != null) {
-			viewer.setTitle(
-				messageBundle.getString("viewer.window.title.default"));
-		}
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.icepdf.ri.common.SwingController#reflectToolInToolButtons()
-	 */
-	@Override
-	protected void reflectToolInToolButtons() {
+    this.currentScreen = screen;
 
-		super.reflectToolInToolButtons();
-		reflectSelectionInButton(
-			switchButton, documentViewController.isToolModeSelected(
-				DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION));
-	}
+    applySettingsOnButtons(screenEnum);
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.icepdf.ri.common.SwingController#actionPerformed(java.awt.event.
-	 * ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent event) {
+    frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 
-		super.actionPerformed(event);
-		Object source = event.getSource();
-		if (source == null)
-			return;
+  }
 
-		if (source == switchButton) {
-			swapScreens();
-		}
-		else if (source == resetButton) {
-			int dialogResult = JOptionPane.showConfirmDialog(
-				viewer,
-				messageBundle.getString("bgsignature.window.back.message"),
-				messageBundle.getString("bgsignature.window.back.title"),
-				JOptionPane.YES_NO_OPTION);
-			if (dialogResult == JOptionPane.YES_OPTION) {
-				FileSystemManager.getInstance().getPdfStrokedDoc().delete();
-				this.openDocument(
-					FileSystemManager.getInstance().getPdfDocument().getAbsolutePath());
-			}
-		}
-		if (source == okButton) {
+  /**
+   * Sets the default stroke vendor.
+   */
+  private void setDefaultStrokeProvider() {
 
-			if (!FileSystemManager.getInstance().getPdfStrokedDoc().exists()) {
-				JOptionPane.showMessageDialog(
-					viewer,
-					messageBundle.getString(
-						"bgsignature.window.errorstrokes.message"),
-					messageBundle.getString(
-						"bgsignature.window.errorstrokes.title"),
-					JOptionPane.ERROR_MESSAGE);
-			}
-			else {
-				PayloadTO post = new PayloadTO();
-				post.setSessionID(
-					FileSystemManager.getInstance().getSessionId());
-				post.setStage(Stage.MANUAL_SIGNED);
-				ObjectMapper objectMapper = new ObjectMapper();
-				String pckg = null;
-				try {
-					pckg = objectMapper.writeValueAsString(post);
-				}
-				catch (JsonProcessingException e) {
-					logger.log(
-						Level.WARNING,
-						"There was an error trying to parse PayloadTO", e);
-					e.printStackTrace();
-				}
-				try {
-					MQUtility.sendMessageMQ(
-						ListenerQueueConfig.class, ListenerMessageSender.class,
-						pckg);
-					this.deleteOnExit = Boolean.FALSE;
-					windowManagementCallback.disposeWindow(
-						this, viewer, propertiesManager.getPreferences());
-				}
-				catch (Exception e) {
-					logger.log(
-						Level.WARNING,
-						"There was an error trying to connect with the local server to send package",
-						e);
-					e.printStackTrace();
-					JOptionPane.showMessageDialog(
-						viewer,
-						messageBundle.getString(
-							"bgsignature.window.error.message"),
-						messageBundle.getString(
-							"bgsignature.window.error.title"),
-						JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		}
-	}
+    boolean forceLoadingProvider = Boolean.parseBoolean(
+      PropertiesManager.getInstance().getValue("forceload.stroke.provider.implementation"));
 
-	/**
-	 * Swap screens and return a enum that represents the current screen where
-	 * is the viewer is displayed .
-	 *
-	 * @return the screen
-	 */
-	private Screen swapScreens() {
+    try {
 
-		Frame viewer = this.getViewerFrame();
-		int screen = this.getCurrentScreen();
-		Screen screenEnum = Screen.getAlternateScreen(screen);
-		if (screenEnum.equals(Screen.MAIN))
-			setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN);
-		else
-			setDocumentToolMode(
-				DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
-		this.showOnScreen(screenEnum, viewer);
-		return screenEnum;
-	}
+      Consumer<IStrokeSignature> consumer = null;
 
-	/**
-	 * Apply settings on action buttons.
-	 *
-	 * @param screenEnum
-	 *            the screen enum
-	 */
-	private void applySettingsOnButtons(Screen screenEnum) {
+      ServiceLoader<IStrokeSignature> loader = ServiceLoader.load(IStrokeSignature.class);
 
-		Color back = null;
-		Color fore = null;
-		String switchText = null;
-		boolean isMain = !screenEnum.equals(Screen.EXTENDED);
-		boolean isVendorFound = vendor != null;
+      if (forceLoadingProvider) {
 
-		switch (screenEnum) {
-		case EXTENDED:
-			back = SwingViewExtendedBuilder.ORANGE_BG;
-			fore = SwingViewExtendedBuilder.WHITE_BG;
-			switchText =
-				messageBundle.getString("bgsignature.button.swap-l.label");
-			break;
-		case MAIN:
-			back = SwingViewExtendedBuilder.WHITE_BG;
-			fore = SwingViewExtendedBuilder.BLUE_BG;
-			switchText =
-				messageBundle.getString("bgsignature.button.swap-r.label");
-			break;
-		}
+        consumer = cons -> {
 
-		if (switchButton != null) {
-			switchButton.setText(switchText);
-			switchButton.setBackground(back);
-			switchButton.setForeground(fore);
-		}
+          if (cons.getVendor().getVendorID().equals(SignaturePadVendor.WACOM.getVendorID())) {
 
-		if (okButton != null) {
-			okButton.setVisible(isMain);
-			okButton.setEnabled(isVendorFound);
-		}
+            vendor = cons;
 
-		if (resetButton != null) {
-			resetButton.setVisible(isMain);
-			resetButton.setEnabled(isVendorFound);
-		}
-	}
+            ((IStrokeSignatureLicensed) vendor).setLicense(
+              PropertiesManager.getInstance().getValue("stroke.provider.wacom.license"));
 
-	/**
-	 * Gets the current screen.
-	 *
-	 * @return the current screen
-	 */
-	public int getCurrentScreen() {
+          }
 
-		return currentScreen;
-	}
-	/**
-	 * 
-	 * @return
-	 */
-	public Boolean isDeleteOnExit() {
-		return deleteOnExit;
-	}
+        };
+
+      } else {
+
+        List<String> devices = WMICUtil.getRawDevicesConnected();
+
+        consumer = cons -> {
+
+          for (String device : devices) {
+
+            if (cons.getVendor().getVendorID().equals(device)) {
+              vendor = cons;
+            }
+
+          }
+
+        };
+
+      }
+
+      loader.forEach(consumer);
+
+      logger.log(Level.INFO, "Signature strokes vendorID found -> {0}",
+        null != vendor ? vendor.getVendor().toString() : "");
+
+      documentViewController = new DocumentViewControllerExtendedImpl(this);
+
+      if (vendor != null) {
+
+        ((DocumentViewControllerExtendedImpl) documentViewController).setSignatureVendor(vendor);
+
+      } else {
+
+        throw new FeatureNotImplemented("No signature strokes vendor-implementation was found");
+
+      }
+
+    } catch (
+
+    Exception e) {
+
+      logger.log(Level.FINE, "Error loading IStrokeSignature services: " + e.getMessage(), e);
+
+      org.icepdf.ri.util.Resources.showMessageDialog(null, JOptionPane.INFORMATION_MESSAGE,
+        messageBundle, "viewer.dialog.error.exception.title", "viewer.dialog.error.exception.msg",
+        "[No se ha detectado ningún dispositivo de firma digital conectado, por lo tanto no puede "
+            + "realizar ninguna operación sobre el documento]");
+
+      logger.log(Level.SEVERE, "Error cargando proveedor de firmas", e);
+
+      System.exit(1);
+
+    }
+
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.icepdf.ri.common.SwingController#setDisplayTool(int)
+   */
+  @Override
+  public void setDisplayTool(int argToolName) {
+
+    boolean actualToolMayHaveChanged = false;
+
+    if (argToolName == DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION) {
+
+      actualToolMayHaveChanged =
+          documentViewController.setToolMode(DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION);
+
+      documentViewController.setViewCursor(DocumentViewController.CURSOR_HAND_OPEN);
+
+      setCursorOnComponents(DocumentViewController.CURSOR_DEFAULT);
+
+    } else {
+      super.setDisplayTool(argToolName);
+    }
+
+    if (actualToolMayHaveChanged) {
+      reflectToolInToolButtons();
+    }
+
+    // repaint the page views.
+    documentViewController.getViewContainer().repaint();
+
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.icepdf.ri.common.SwingController#openDocument(java.lang.String)
+   */
+  @Override
+  public void openDocument(String pathname) {
+
+    super.openDocument(pathname);
+
+    setPageViewMode(DocumentViewControllerImpl.ONE_COLUMN_VIEW, false);
+    setPageFitMode(DocumentViewController.PAGE_FIT_WINDOW_WIDTH, false);
+    setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
+
+    showOnScreen(Screen.EXTENDED, viewer);
+
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.icepdf.ri.common.SwingController#commonNewDocumentHandling(java.lang. String)
+   */
+  @Override
+  public void commonNewDocumentHandling(String fileDescription) {
+
+    super.commonNewDocumentHandling(fileDescription);
+
+    // remove the file name from title bar
+    if (viewer != null) {
+      viewer.setTitle(messageBundle.getString("viewer.window.title.default"));
+    }
+
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.icepdf.ri.common.SwingController#reflectToolInToolButtons()
+   */
+  @Override
+  protected void reflectToolInToolButtons() {
+
+    super.reflectToolInToolButtons();
+
+    reflectSelectionInButton(finishButton,
+      documentViewController.isToolModeSelected(DocumentViewModelImpl.DISPLAY_TOOL_SWAP_SELECTION));
+
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.icepdf.ri.common.SwingController#actionPerformed(java.awt.event. ActionEvent)
+   */
+  @Override
+  public void actionPerformed(ActionEvent event) {
+
+    super.actionPerformed(event);
+
+    Object source = event.getSource();
+
+    if (source == null) {
+      return;
+    }
+
+    if (finishButton == source) {
+
+      swapScreens();
+
+    } else if (resetButton == source) {
+
+      int dialogResult = JOptionPane.showConfirmDialog(viewer,
+        messageBundle.getString("bgsignature.window.back.message"),
+        messageBundle.getString("bgsignature.window.back.title"), JOptionPane.OK_CANCEL_OPTION);
+
+      if (dialogResult == JOptionPane.YES_OPTION) {
+
+        FileSystemManager.getInstance().getPdfStrokedDoc().delete();
+
+        this.openDocument(FileSystemManager.getInstance().getPdfDocument().getAbsolutePath());
+
+      }
+
+    } else if (cancelButton == source) {
+
+      windowManagementCallback.disposeWindow(this, viewer, propertiesManager.getPreferences());
+
+    }
+
+    if (source == okButton) {
+
+      if (!FileSystemManager.getInstance().getPdfStrokedDoc().exists()) {
+
+        JOptionPane.showMessageDialog(viewer,
+          messageBundle.getString("bgsignature.window.errorstrokes.message"),
+          messageBundle.getString("bgsignature.window.errorstrokes.title"),
+          JOptionPane.ERROR_MESSAGE);
+
+      } else {
+
+        PayloadTO post = new PayloadTO();
+
+        post.setSessionID(FileSystemManager.getInstance().getSessionId());
+        post.setStage(Stage.MANUAL_SIGNED);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String pckg = null;
+
+        try {
+
+          pckg = objectMapper.writeValueAsString(post);
+
+        } catch (JsonProcessingException e) {
+
+          logger.log(Level.WARNING, "Error procesando JSON", e);
+
+        }
+
+        try {
+
+          MQUtility.sendMessageMQ(ListenerQueueConfig.class, ListenerMessageSender.class, pckg);
+
+          this.deleteOnExit = Boolean.FALSE;
+
+          windowManagementCallback.disposeWindow(this, viewer, propertiesManager.getPreferences());
+
+        } catch (Exception e) {
+
+          logger.log(Level.WARNING, "Error enviando mensaje a MQ", e);
+
+          JOptionPane.showMessageDialog(viewer,
+            messageBundle.getString("bgsignature.window.error.message"),
+            messageBundle.getString("bgsignature.window.error.title"), JOptionPane.ERROR_MESSAGE);
+
+        }
+
+      }
+
+    }
+
+  }
+
+  /**
+   * Swap screens and return a enum that represents the current screen where is the viewer is
+   * displayed .
+   *
+   * @return the screen
+   */
+  private Screen swapScreens() {
+
+    Frame viewer = this.getViewerFrame();
+    int screen = this.getCurrentScreen();
+
+    Screen screenEnum = Screen.getAlternateScreen(screen);
+
+    if (screenEnum.equals(Screen.MAIN)) {
+
+      setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN);
+
+    } else {
+
+      setDocumentToolMode(DocumentViewModelImpl.DISPLAY_TOOL_PAN_EXTENDED);
+
+    }
+
+    this.showOnScreen(screenEnum, viewer);
+
+    return screenEnum;
+
+  }
+
+  /**
+   * Apply settings on action buttons.
+   *
+   * @param screenEnum the screen enum
+   */
+  private void applySettingsOnButtons(Screen screen) {
+
+    boolean isVendorFound = null != vendor;
+    boolean isMainScreen = Screen.MAIN.equals(screen);
+
+    okButton.setEnabled(isVendorFound);
+    resetButton.setEnabled(isVendorFound);
+    finishButton.setEnabled(isVendorFound);
+    cancelButton.setEnabled(isVendorFound);
+
+    mainWindowPanel.setVisible(isMainScreen);
+    mainWindowPanel.setEnabled(isVendorFound);
+
+    extendedWindowPanel.setVisible(!isMainScreen);
+    extendedWindowPanel.setEnabled(isVendorFound);
+
+  }
+
+  // ==================
+  // Getters & Setters
+  // ==================
+
+  /**
+   * Gets the current screen.
+   *
+   * @return the current screen
+   */
+  public int getCurrentScreen() {
+
+    return this.currentScreen;
+
+  }
+
+  /**
+   * 
+   * @return
+   */
+  public Boolean isDeleteOnExit() {
+
+    return this.deleteOnExit;
+
+  }
+
+  /**
+   * Sets the sign button.
+   *
+   * @param btn the new sign button
+   */
+  public void setMainWindowPanel(JPanel pan) {
+    this.mainWindowPanel = pan;
+  }
+
+  /**
+   * Sets the view panel.
+   *
+   * @param btn the new sign button
+   */
+  public void setExtendedWindowPanel(JPanel pan) {
+    this.extendedWindowPanel = pan;
+  }
+
+  /**
+   * Sets the sign button.
+   *
+   * @param btn the new sign button
+   */
+  public void setFinishButton(JButton btn) {
+
+    this.finishButton = btn;
+
+    btn.addActionListener(this);
+
+  }
+
+  /**
+   * Sets the cancel button.
+   *
+   * @param btn the new sign button
+   */
+  public void setCancelButton(JButton btn) {
+
+    this.cancelButton = btn;
+
+    btn.addActionListener(this);
+
+  }
+
+  /**
+   * Sets the OK button.
+   *
+   * @param btn the new sign button
+   */
+  public void setOkButton(JButton btn) {
+
+    this.okButton = btn;
+
+    btn.addActionListener(this);
+
+  }
+
+  /**
+   * Sets the reset button.
+   *
+   * @param btn the new reset button
+   */
+  public void setResetButton(JButton btn) {
+
+    this.resetButton = btn;
+
+    btn.addActionListener(this);
+
+  }
+
 }

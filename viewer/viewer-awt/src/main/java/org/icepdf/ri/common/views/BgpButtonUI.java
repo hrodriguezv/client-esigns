@@ -26,13 +26,13 @@ import javax.swing.plaf.basic.BasicButtonUI;
  *
  * @author hrodriguez
  */
-public class RoundedCornerButtonUI extends BasicButtonUI {
+public class BgpButtonUI extends BasicButtonUI {
 
   /** The Constant ARC_WIDTH. */
-  private static final double ARC_WIDTH = 8d;
+  private static final double ARC_WIDTH = 0d;
 
   /** The Constant ARC_HEIGHT. */
-  private static final double ARC_HEIGHT = 8d;
+  private static final double ARC_HEIGHT = 0d;
 
   /** The Constant FOCUS_STROKE. */
   private static final int FOCUS_STROKE = 2;
@@ -69,7 +69,7 @@ public class RoundedCornerButtonUI extends BasicButtonUI {
     b.setBorderPainted(false);
     b.setOpaque(false);
     b.setBackground(new Color(245, 250, 255));
-    b.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
+    b.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
     initShape(b);
 
@@ -82,54 +82,38 @@ public class RoundedCornerButtonUI extends BasicButtonUI {
    */
   @Override
   protected void installListeners(AbstractButton button) {
-
     BasicButtonListener listener = new BasicButtonListener(button) {
-
       @Override
       public void mousePressed(MouseEvent e) {
-
         AbstractButton b = (AbstractButton) e.getComponent();
-
         initShape(b);
-
         if (isShapeContains(e.getPoint())) {
           super.mousePressed(e);
         }
-
       }
 
       @Override
       public void mouseEntered(MouseEvent e) {
-
         if (isShapeContains(e.getPoint())) {
           super.mouseEntered(e);
         }
-
       }
 
       @Override
       public void mouseMoved(MouseEvent e) {
-
         if (isShapeContains(e.getPoint())) {
-
           super.mouseEntered(e);
-
         } else {
-
           super.mouseExited(e);
-
         }
-
       }
-
     };
-
+    // if (listener != null)
     button.addMouseListener(listener);
     button.addMouseMotionListener(listener);
     button.addFocusListener(listener);
     button.addPropertyChangeListener(listener);
     button.addChangeListener(listener);
-
   }
 
   /*
@@ -139,7 +123,6 @@ public class RoundedCornerButtonUI extends BasicButtonUI {
    */
   @Override
   public void paint(Graphics g, JComponent c) {
-
     initShape(c);
 
     Graphics2D g2 = (Graphics2D) g.create();
@@ -147,37 +130,26 @@ public class RoundedCornerButtonUI extends BasicButtonUI {
 
     // ContentArea
     if (c instanceof AbstractButton) {
-
       AbstractButton b = (AbstractButton) c;
       ButtonModel model = b.getModel();
-
       if (model.isArmed()) {
-
         g2.setPaint(ac);
         g2.fill(shape);
-
       } else if (b.isRolloverEnabled() && model.isRollover()) {
-
         paintFocusAndRollover(g2, c, rc);
-
       } else if (b.hasFocus()) {
-
         paintFocusAndRollover(g2, c, fc);
-
       } else {
-
         g2.setPaint(c.getBackground());
         g2.fill(shape);
-
       }
-
     }
 
+    // Border
+    // g2.setPaint(c.getForeground());
     g2.draw(shape);
     g2.dispose();
-
     super.paint(g, c);
-
   }
 
   /**

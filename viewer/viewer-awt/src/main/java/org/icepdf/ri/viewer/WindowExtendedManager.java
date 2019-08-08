@@ -45,7 +45,9 @@ public class WindowExtendedManager extends WindowManager {
 
   protected static final Logger logger = Logger.getLogger(WindowExtendedManager.class.toString());
 
-  /** The window manager. */
+  /**
+   * The window manager.
+   */
   private static WindowExtendedManager windowManager;
 
   /**
@@ -59,6 +61,7 @@ public class WindowExtendedManager extends WindowManager {
       ResourceBundle messageBundle) {
 
     return createInstance(properties, messageBundle, null);
+
   }
 
   /**
@@ -75,24 +78,38 @@ public class WindowExtendedManager extends WindowManager {
     windowManager = new WindowExtendedManager();
     windowManager.properties = properties;
     windowManager.controllers = new ArrayList<>();
+
     try {
+
       FileSystemManager.getInstance().init(id);
+
     } catch (FileNotFoundException e) {
+
       logger.log(Level.FINE, "Error checking file system: " + e.getMessage(), e);
+
       org.icepdf.ri.util.Resources.showMessageDialog(null, JOptionPane.INFORMATION_MESSAGE,
-          messageBundle, "viewer.dialog.error.exception.title", "viewer.dialog.error.exception.msg",
-          "[Error de inconsistencia en el sistema de archivos. Por favor, contacte a su admininstrador]");
+        messageBundle, "viewer.dialog.error.exception.title", "viewer.dialog.error.exception.msg",
+        "[Error de inconsistencia en el sistema de archivos. Por favor, contacte a su admininstrador]");
+
       e.printStackTrace();
+
       System.exit(1);
+
     }
 
     if (messageBundle != null) {
+
       windowManager.messageBundle = messageBundle;
+
     } else {
+
       windowManager.messageBundle =
           ResourceBundle.getBundle(PropertiesManager.DEFAULT_MESSAGE_BUNDLE);
+
     }
+
     return windowManager;
+
   }
 
   /*
@@ -110,18 +127,26 @@ public class WindowExtendedManager extends WindowManager {
         .setAnnotationCallback(new MyAnnotationCallback(controller.getDocumentViewController()));
 
     controllers.add(controller);
+
     // guild a new swing viewer with remembered view settings.
     int viewType = DocumentViewControllerImpl.ONE_PAGE_VIEW;
     int pageFit = DocumentViewController.PAGE_FIT_WINDOW_WIDTH;
+
     float pageRotation = 0;
+
     Preferences viewerPreferences = getProperties().getPreferences();
+
     try {
+
       viewType = viewerPreferences.getInt(PROPERTY_DEFAULT_VIEW_TYPE,
-          DocumentViewControllerImpl.ONE_PAGE_VIEW);
+        DocumentViewControllerImpl.ONE_PAGE_VIEW);
+
       pageFit = viewerPreferences.getInt(PropertiesManager.PROPERTY_DEFAULT_PAGEFIT,
-          DocumentViewController.PAGE_FIT_WINDOW_WIDTH);
+        DocumentViewController.PAGE_FIT_WINDOW_WIDTH);
+
       pageRotation =
           viewerPreferences.getFloat(PropertiesManager.PROPERTY_DEFAULT_ROTATION, pageRotation);
+
     } catch (NumberFormatException e) {
       // eating error, as we can continue with out alarm
     }
@@ -130,12 +155,17 @@ public class WindowExtendedManager extends WindowManager {
         new SwingViewExtendedBuilder((SwingController) controller, viewType, pageFit, pageRotation);
 
     JFrame frame = factory.buildViewerFrame();
+
     if (frame != null) {
+
       newWindowLocation(frame);
+
       frame.setVisible(true);
+
     }
 
     return controller;
+
   }
 
   @Override
@@ -148,10 +178,14 @@ public class WindowExtendedManager extends WindowManager {
       if (!FileSystemManager.getInstance().getPdfStrokedDoc().exists()) {
 
         PayloadTO post = TransferObjectsUtil.buildPayloadFromDrive();
+
         post.setSessionID(FileSystemManager.getInstance().getSessionId());
         post.setStage(Stage.COMPLETED);
+
         ObjectMapper objectMapper = new ObjectMapper();
+
         String pckg = objectMapper.writeValueAsString(post);
+
         MQUtility.sendMessageMQ(ListenerQueueConfig.class, ListenerMessageSender.class, pckg);
       }
 
@@ -161,20 +195,18 @@ public class WindowExtendedManager extends WindowManager {
 
     }
 
-
     try {
 
       FileSystemManager.getInstance().deleteOnExit(doIt);
 
     } catch (IOException e) {
 
-      logger.severe("Error deleting files in configured workspace");
+      logger.severe("Error deleting files in configured workspace - " + e.getMessage());
 
     }
 
-
-
     super.disposeWindow(controller, viewer, preferences);
+
   }
 
 }

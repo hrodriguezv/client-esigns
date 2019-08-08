@@ -270,6 +270,10 @@ public class PropertiesManager {
 	/** The Constant PROPERTY_SHOW_UTILITY_RESET. */
 	public static final String PROPERTY_SHOW_UTILITY_RESET =
 		"application.toolbar.show.utility.reset";
+	
+    /** The Constant PROPERTY_SHOW_UTILITY_CANCEL. */
+    public static final String PROPERTY_SHOW_UTILITY_CANCEL =
+        "application.toolbar.show.utility.cancel";
 
 	/** The Constant PROPERTY_HIDE_UTILITYPANE. */
 	// properties used to hide/show utility pane tabs

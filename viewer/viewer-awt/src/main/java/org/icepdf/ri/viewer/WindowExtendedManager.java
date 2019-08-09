@@ -172,22 +172,20 @@ public class WindowExtendedManager extends WindowManager {
   public void disposeWindow(Controller controller, JFrame viewer, Preferences preferences) {
 
     Boolean doIt = ((SwingExtendedController) controller).isDeleteOnExit();
+    boolean doneSigning = ((SwingExtendedController) controller).isDoneSigning();
 
     try {
 
-      if (!FileSystemManager.getInstance().getPdfStrokedDoc().exists()) {
+      PayloadTO post = TransferObjectsUtil.buildPayloadFromDrive();
 
-        PayloadTO post = TransferObjectsUtil.buildPayloadFromDrive();
+      post.setSessionID(FileSystemManager.getInstance().getSessionId());
+      post.setStage(doneSigning ? Stage.COMPLETED : Stage.CANCELLED);
 
-        post.setSessionID(FileSystemManager.getInstance().getSessionId());
-        post.setStage(Stage.COMPLETED);
+      ObjectMapper objectMapper = new ObjectMapper();
 
-        ObjectMapper objectMapper = new ObjectMapper();
+      String pckg = objectMapper.writeValueAsString(post);
 
-        String pckg = objectMapper.writeValueAsString(post);
-
-        MQUtility.sendMessageMQ(ListenerQueueConfig.class, ListenerMessageSender.class, pckg);
-      }
+      MQUtility.sendMessageMQ(ListenerQueueConfig.class, ListenerMessageSender.class, pckg);
 
     } catch (Exception e) {
 

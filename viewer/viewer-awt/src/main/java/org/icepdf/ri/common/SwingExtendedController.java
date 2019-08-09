@@ -92,6 +92,11 @@ public class SwingExtendedController extends SwingController {
   private Boolean deleteOnExit = Boolean.TRUE;
 
   /**
+   * User said signatures matches with documentation.
+   */
+  private boolean doneSigning;
+
+  /**
    * The Enum Screen.
    */
   public enum Screen {
@@ -427,6 +432,7 @@ public class SwingExtendedController extends SwingController {
 
           this.deleteOnExit = Boolean.FALSE;
 
+          doneSigning = true;
           windowManagementCallback.disposeWindow(this, viewer, propertiesManager.getPreferences());
 
         } catch (Exception e) {
@@ -519,6 +525,16 @@ public class SwingExtendedController extends SwingController {
   public Boolean isDeleteOnExit() {
 
     return this.deleteOnExit;
+
+  }
+
+  /**
+   * 
+   * @return
+   */
+  public Boolean isDoneSigning() {
+
+    return this.doneSigning;
 
   }
 

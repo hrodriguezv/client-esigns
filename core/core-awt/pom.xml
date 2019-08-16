@@ -36,6 +36,29 @@
     <url>http://jira.icesoft.org/browse/PDF/</url>
   </issueManagement>
 
+  <dependencies>
+
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx</artifactId>
+      <version>11</version>
+      <type>pom</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>11</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-swing</artifactId>
+      <version>11</version>
+    </dependency>
+
+  </dependencies>
+
   <build>
 
     <finalName>icepdf-core-${version}</finalName>
@@ -78,6 +101,10 @@
 
           </execution>
         </executions>
+
+        <configuration>
+          <doclint>none</doclint>
+        </configuration>
 
       </plugin>
 

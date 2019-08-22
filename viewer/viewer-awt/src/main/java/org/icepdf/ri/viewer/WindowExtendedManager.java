@@ -189,7 +189,7 @@ public class WindowExtendedManager extends WindowManager {
 
     } catch (Exception e) {
 
-      logger.severe("Error sending status to Stella");
+      logger.log(Level.SEVERE, "Error sending status to Stella", e);
 
     }
 
@@ -199,7 +199,7 @@ public class WindowExtendedManager extends WindowManager {
 
     } catch (IOException e) {
 
-      logger.severe("Error deleting files in configured workspace - " + e.getMessage());
+      logger.log(Level.SEVERE, "Error deleting files in configured workspace", e);
 
     }
 

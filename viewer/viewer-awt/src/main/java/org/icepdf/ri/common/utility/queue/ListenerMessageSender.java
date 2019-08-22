@@ -22,40 +22,41 @@ import com.consultec.esigns.core.util.PropertiesManager;
 @Component("MessageSender")
 public class ListenerMessageSender implements IMessageSender {
 
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ListenerMessageSender.class);
+  /** The Constant logger. */
+  private static final Logger logger = LoggerFactory.getLogger(ListenerMessageSender.class);
 
-	/** The connection factory. */
-	@Autowired
-	private ConnectionFactory connectionFactory;
+  /** The connection factory. */
+  @Autowired
+  private ConnectionFactory connectionFactory;
 
-	/** The jms template. */
-	private JmsTemplate jmsTemplate;
+  /** The jms template. */
+  private JmsTemplate jmsTemplate;
 
-	/**
-	 * Inits the.
-	 */
-	@PostConstruct
-	public void init() {
-		this.jmsTemplate = new JmsTemplate(connectionFactory);
-	}
+  /**
+   * Inits the.
+   */
+  @PostConstruct
+  public void init() {
+    this.jmsTemplate = new JmsTemplate(connectionFactory);
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.consultec.esigns.core.queue.IMessageSender#sendMessage(java.lang.String)
-	 */
-	public void sendMessage(final String message) {
-		logger.info("sending to ["
-				+ PropertiesManager.getInstance().getValue(PropertiesManager.QUEUE_SERVER_NAME) + "]"
-				+ message);
-		jmsTemplate.send(
-				PropertiesManager.getInstance().getValue(PropertiesManager.QUEUE_SERVER_NAME),
-				new MessageCreator() {
-					public Message createMessage(Session session) throws JMSException {
-						return session.createTextMessage(message);
-					}
-				});
-	}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.consultec.esigns.core.queue.IMessageSender#sendMessage(java.lang.String)
+   */
+  public void sendMessage(final String message) {
+
+    logger.debug(
+      "sending to [" + PropertiesManager.getInstance().getValue(PropertiesManager.QUEUE_SERVER_NAME)
+          + "]" + message);
+
+    jmsTemplate.send(PropertiesManager.getInstance().getValue(PropertiesManager.QUEUE_SERVER_NAME),
+      new MessageCreator() {
+        public Message createMessage(Session session) throws JMSException {
+          return session.createTextMessage(message);
+        }
+      });
+
+  }
 }

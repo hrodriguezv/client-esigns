@@ -90,5 +90,13 @@ artifacts {
 }
 
 dependencies {
-    compile project(':core:core-awt')
+
+  compile project(':core:core-awt')
+
+  compile 'org.springframework:spring-core:${SPRING_VERSION}'
+  compile 'org.springframework:spring-aop:${SPRING_VERSION}'
+  compile 'org.springframework:spring-beans:${SPRING_VERSION}'
+  compile 'org.springframework:spring-context:${SPRING_VERSION}'
+  compile 'org.springframework:spring-jms:${SPRING_VERSION}'
+
 }
